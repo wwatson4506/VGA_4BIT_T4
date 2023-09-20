@@ -136,7 +136,7 @@ void setup() {
   vga4bit.textxy(0,0);
   // Print a title.
   vga4bit.println("********** USB Mouse and Graphic Cursor Example **********");
-  // Draw a centered white filled rectangle.
+  // Draw a centered blue filled rectangle.
   vga4bit.fillRect(fb_width/4,fb_height/4,(fb_width/2)+(fb_width/4),
                   (fb_height/2)+(fb_height/4),VGA_BLUE);
 
