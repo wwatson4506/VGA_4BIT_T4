@@ -150,7 +150,6 @@ void setup() {
   //              3 = I-Beam cursor.             (I_BEAM)
   //              (cursors 1, 2 and 3 ignore last for arguments).
   // Block cursor dimensions are in pixels. Cannot exceed font dimensions minus 1.
-  // Cursor 
   vga4bit.initGcursor(FILLED_ARROW,0,0,vga4bit.getFontWidth()-1,vga4bit.getFontHeight()-1);
   // Inititalize text cursor.
   // initCursor(Cursor x start, Cursor y start, Cursor x end, Cursor y end) 
@@ -173,8 +172,8 @@ void loop() {
     vga4bit.printf("Wheel: %2d\n", mouse_msg.wheel);
     vga4bit.printf("WheelH: %2d\n", mouse_msg.wheelH);
     checkMouseClicks(); // Check for mouse button use.
-	scCount += getSnglClick(); // Add to Single Click Count.
-	dcCount += getDblClick(); // Add to Double Click Count.
+    scCount += getSnglClick(); // Add to Single Click Count.
+    dcCount += getDblClick(); // Add to Double Click Count.
     vga4bit.printf("Single Clicks: %d\n", scCount);
     vga4bit.printf("Double Clicks: %d\n", dcCount);
     // Set mouse cursor position.
@@ -203,7 +202,7 @@ void scaleMouseXY(void) {
   // Clip to display dimensions.
   if(mouse_msg.scaledX < 0) mouse_msg.scaledX = 0;
   if(mouse_msg.scaledX > (uint16_t)fb_width-1) mouse_msg.scaledX = (uint16_t)fb_width-1;
-  if(mouse_msg.scaledY < 0)	mouse_msg.scaledY = 0;
+  if(mouse_msg.scaledY < 0) mouse_msg.scaledY = 0;
   if(mouse_msg.scaledY > (uint16_t)fb_height-1)	mouse_msg.scaledY = (uint16_t)fb_height-1;
 }
 
