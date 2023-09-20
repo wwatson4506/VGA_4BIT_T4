@@ -2,4 +2,4 @@
 
 ## This library is based on jmarsh's FlexIO2VGA sketch. Found here:
 
-## https://forum.pjrc.com/threads/72710-VGA-output-via-FlexIO-(Teensy4)
+# https://forum.pjrc.com/threads/72710-VGA-output-via-FlexIO-(Teensy4)
