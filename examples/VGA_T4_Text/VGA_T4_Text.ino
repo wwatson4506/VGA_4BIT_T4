@@ -6,7 +6,7 @@ const vga_timing *timing = &t640x400x70;
 FlexIO2VGA vga4bit;
 static int fb_width, fb_height;
 
-#define FONTSIZE 8
+#define FONTSIZE 16
 
 void setup() {
   Serial.begin(9600);
@@ -38,7 +38,7 @@ void setup() {
   // Turn cursor on
   vga4bit.cursorOn();
   // Move cursor to home position
-  vga4bit.moveCursor(0,0);
+  vga4bit.textat(0,0);
   // Display a C64 like screen
   vga4bit.printf("\n    **** COMMODORE 64 BASIC V2 ****     \n");
   vga4bit.printf("\n 64K RAM SYSTEM  38911 BASIC BYTES FREE \n");
