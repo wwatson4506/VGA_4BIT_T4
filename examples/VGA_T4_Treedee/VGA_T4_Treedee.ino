@@ -86,7 +86,7 @@ void setup() {
   vga4bit.setForegroundColor(VGA_BRIGHT_GREEN);
   // Clear screen to background color
   vga4bit.clear(VGA_BLACK);
-  vga4bit.moveCursor(0,fb_height-FONTSIZE);
+  vga4bit.textxy(0,fb_height-FONTSIZE);
   vga4bit.printf("4 bit VGA version of Sumotoy's treedee example at 1024x768 with 16 colors...");
 }
 
