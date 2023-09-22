@@ -24,26 +24,25 @@ There are four supported video modes:
 - 640x480x60
 - 640x400x70
 
-Each nibble (one pixel) can be one of 16 RGBI colors:
--  VGA_BLACK ------------> 0
--  VGA_BLUE -------------> 1
--  VGA_GRE --------------> 2
--  VGA_CYAN -------------> 3
--  VGA_RED --------------> 4
--  VGA_MAGENTA ----------> 5
--  VGA_YELLOW -----------> 6
--  VGA_WHITE ------------> 7
--  VGA_GREY -------------> 8
--  VGA_BRIGHT_BLUE ------> 9
--  VGA_BRIGHT_GREEN ----> 10
--  VGA_BRIGHT_CYAN -----> 11
--  VGA_BRIGHT_RED ------> 12
--  VGA_BRIGHT_MAGENTA --> 13
--  VGA_BRIGHT_YELLOW ---> 14
--  VGA_BRIGHT_WHITE ----->15
-
-
 Since this version of the driver is using DMA memory DMA and malloc memory are affected by the screen size.
+
+Each nibble (one pixel) can be one of 16 RGBI colors (0 to 15):
+-  0 VGA_BLACK
+-  1 VGA_BLUE
+-  2 VGA_GREEN
+-  3 VGA_CYAN
+-  4 VGA_RED
+-  5 VGA_MAGENTA
+-  6 VGA_YELLOW
+-  7 VGA_WHITE
+-  8 VGA_GREY
+-  9 VGA_BRIGHT_BLUE
+- 10 VGA_BRIGHT_GREEN
+- 11 VGA_BRIGHT_CYAN
+- 12 VGA_BRIGHT_RED
+- 13 VGA_BRIGHT_MAGENTA
+- 14 VGA_BRIGHT_YELLOW
+- 15 VGA_BRIGHT_WHITE
 
 
 
