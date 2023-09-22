@@ -6,7 +6,7 @@ const vga_timing *timing = &t640x400x70;
 FlexIO2VGA vga4bit;
 static int fb_width, fb_height;
 
-#define FONTSIZE 16
+#define FONTSIZE 8
 
 void setup() {
   Serial.begin(9600);
@@ -34,7 +34,7 @@ void setup() {
   //  - block cursor 7 pixels wide and 8 pixels high
   //  - blink enabled
   //  - blink rate of 30
-  vga4bit.initCursor(1,0,7,7,true,30);
+  vga4bit.initCursor(0,0,7,11,true,30);
   // Turn cursor on
   vga4bit.cursorOn();
   // Move cursor to home position
