@@ -44,5 +44,7 @@ Each nibble (one pixel) can be one of 16 RGBI colors (0 to 15):
 - 14 VGA_BRIGHT_YELLOW
 - 15 VGA_BRIGHT_WHITE
 
+There a few examples of usage including a graphic cursor as well as a simple screen editor using an adapted version of the Kilo editor found online here: https://viewsourcecode.org/snaptoken/kilo/.
 
-
+Examples:
+- 
