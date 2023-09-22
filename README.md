@@ -47,4 +47,4 @@ Each nibble (one pixel) can be one of 16 RGBI colors (0 to 15):
 There a few examples of usage including a graphic cursor as well as a simple screen editor using an adapted version of the Kilo editor found online here: https://viewsourcecode.org/snaptoken/kilo/.
 
 Examples:
-- 
+- VGA_T4_Editor -- Requires a USB keyboard plugged into the T4.1 USB host connector. Supports most common editor keys. Uses built in SD card reader and optionally a USB drive if using a USB hub. Uncomment "#define USE_USB_DRIVE 1" at begining of sketch to use USB drive.
