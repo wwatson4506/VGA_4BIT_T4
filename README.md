@@ -47,6 +47,8 @@ Each nibble (one pixel) can be one of 16 RGBI colors (0 to 15):
 There a few examples of usage including a graphic cursor as well as a simple screen editor using an adapted version of the Kilo editor found online here: https://viewsourcecode.org/snaptoken/kilo/.
 
 Examples:
-- VGA_T4_Editor        -- Requires a USB keyboard plugged into the T4.1 USB host connector. Supports most common editor keys. Uses built in SD card reader and optionally a USB drive if using a USB hub. Uncomment "#define USE_USB_DRIVE 1" at begining of sketch to use USB drive.
+- VGA_T4_Editor
+   Requires a USB keyboard plugged into the T4.1 USB host connector. Supports most common editor keys. Uses built in SD card reader and optionally a USB drive if using a USB hub. Uncomment "#define USE_USB_DRIVE 1" at begining of sketch to use USB drive.
 - VGA_T4_Guages        -- This is a version of Sumotoy's guages sketch found in his RA8875 library.
 - VGA_T4_GraphicCursor -- An example of a software driven graphic cursor. Requires a USB mouse connected to the T4.1 USB host connector. There are four types of graphic cursors available (Block, Filled Arrow, Hollow Arrow and I-beam). This uses the "drawBitmap()" function to render the cursor.
+- Grahics              -- 
