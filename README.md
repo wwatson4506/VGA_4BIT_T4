@@ -10,6 +10,32 @@
  
 # This library is WIP and is far from complete or correct!! Playing and testing.
 
+Schematic for RGBI R2R VGA ladder:
+/* R2R ladder:
+ *
+ * GROUND <------------- 536R ----*---- 270R -----*---------> VGA PIN: Red=1
+ *                                |               |
+ * INTENSITY (13) <---536R -------/               |
+ *                                                |
+ * T4-11 <---536R --------------------------------/
+ *
+ * GROUND <------------- 536R ----*---- 270R -----*---------> VGA PIN: Green=2
+ *                                |               |
+ * INTENSITY (13) <---536R -------/               |
+ *                                                |
+ * T4-12 <---536R --------------------------------/
+ *
+ * GROUND <------------- 536R ----*---- 270R -----*---------> VGA PIN: Blue=3
+ *                                |               |
+ * INTENSITY (13) <---536R -------/               |
+ *                                                |
+ * T4-10 <---536R --------------------------------/
+ *
+ * VSYNC (34) <---------------68R---------------------------> VGA PIN 14 T4=34
+ *
+ * HSYNC (35) <---------------68R---------------------------> VGA PIN 13 T4=35
+ */
+
 This is a 4 bit per pixel VGA driver using FlexIO2VGA. 
 There are three main files:
 - VGA_4bit_T4.cpp
@@ -56,5 +82,5 @@ Examples:
 
 All files are heavily commented.
 
-Again this is library is WIP and just for learning and playing...
+Again this is library is WIP and just for learning and playing with FlexIO2VGA capabilities...
 
