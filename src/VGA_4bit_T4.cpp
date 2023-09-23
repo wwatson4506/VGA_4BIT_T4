@@ -1276,7 +1276,6 @@ FLASHMEM void FlexIO2VGA::init_text_settings() {
 // font_width / 2 (2 pixels per byte).
 // font_height * 2 (compensate for font_width / 2).
 //====================================================
-
 FLASHMEM void FlexIO2VGA::getChar(int16_t x, int16_t y, uint8_t *buf) {
   for(int16_t i = 0; i < font_height*2; i++) {
     for(int16_t j = 0; j < (font_width/2); j++) {
