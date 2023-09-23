@@ -30,6 +30,31 @@
 #include "font_8x8.h"
 #include "font_8x16.h"
 
+/* R2R ladder:
+ *
+ * GROUND <------------- 536R ----*---- 270R -----*---------> VGA PIN: Red=1
+ *                                |               |
+ * INTENSITY (13) <---536R -------/               |
+ *                                                |
+ * T4-11 <---536R --------------------------------/
+ *
+ * GROUND <------------- 536R ----*---- 270R -----*---------> VGA PIN: Green=2
+ *                                |               |
+ * INTENSITY (13) <---536R -------/               |
+ *                                                |
+ * T4-12 <---536R --------------------------------/
+ *
+ * GROUND <------------- 536R ----*---- 270R -----*---------> VGA PIN: Blue=3
+ *                                |               |
+ * INTENSITY (13) <---536R -------/               |
+ *                                                |
+ * T4-10 <---536R --------------------------------/
+ *
+ * VSYNC (34) <---------------68R---------------------------> VGA PIN 14 T4=34
+ *
+ * HSYNC (35) <---------------68R---------------------------> VGA PIN 13 T4=35
+ */
+
 DMAMEM uint8_t frameBuffer0[(MAX_HEIGHT+1)*(MAX_WIDTH+STRIDE_PADDING)];
 //uint8_t frameBuffer0[(MAX_HEIGHT+1)*(MAX_WIDTH+STRIDE_PADDING)];
 //EXTMEM uint8_t frameBuffer0[(MAX_HEIGHT+1)*(MAX_WIDTH+STRIDE_PADDING)];
