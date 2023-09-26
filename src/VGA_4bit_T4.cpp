@@ -58,28 +58,6 @@
  * HSYNC (35) <---------------68R---------------------------> VGA PIN 13 - T4 pin 35
  */
 
-//======================================================
-// Newer simplified version of the 4 bit VGA DAC ladder.
-//======================================================
-/*
- * INTENSITY (13) <-- 536R --\
- *                           |
- * GROUND <------ 536R ------*---- 270R ------------*---> VGA PIN: R=1
- *                           |                      |
- *                           |  RED (11) <--- 536R -/
- *                           |
- *                           *---- 270R ------------*---> VGA PIN: G=2
- *                           |                      |
- *                           |  GREEN (12) <- 536R -/
- *                           |
- *                           *---- 270R ------------*---> VGA PIN: B=3
- *                                                  |
- *                              BLUE (10) <-- 536R -/
- *
- * VSYNC (34) <---------------68R---------------------------> VGA PIN 14 - T4 pin 34
- *
- * HSYNC (35) <---------------68R---------------------------> VGA PIN 13 - T4 pin 35
- */
 DMAMEM uint8_t frameBuffer0[(MAX_HEIGHT+1)*(MAX_WIDTH+STRIDE_PADDING)];
 //uint8_t frameBuffer0[(MAX_HEIGHT+1)*(MAX_WIDTH+STRIDE_PADDING)];
 //EXTMEM uint8_t frameBuffer0[(MAX_HEIGHT+1)*(MAX_WIDTH+STRIDE_PADDING)];
