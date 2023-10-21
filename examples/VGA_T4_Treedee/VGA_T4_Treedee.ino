@@ -9,8 +9,8 @@
 
 #define FONTSIZE 16
 
-const vga_timing *timing = &t1024x768x60;
-//const vga_timing *timing = &t800x600x60;
+//const vga_timing *timing = &t1024x768x60;
+const vga_timing *timing = &t800x600x60;
 //const vga_timing *timing = &t640x480x60;
 //const vga_timing *timing = &t640x400x70;
 
@@ -80,7 +80,7 @@ void setup() {
   // Get display dimensions
   vga4bit.getFbSize(&fb_width, &fb_height);
   // Set fontsize 8x16 or (8x8 available)
-  vga4bit.setFontSize(FONTSIZE);
+  vga4bit.setFontSize(FONTSIZE, false);
   // Set default foreground and background colors
   vga4bit.setBackgroundColor(VGA_BLACK); 
   vga4bit.setForegroundColor(VGA_BRIGHT_GREEN);

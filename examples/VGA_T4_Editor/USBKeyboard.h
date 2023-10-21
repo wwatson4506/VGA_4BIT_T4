@@ -42,4 +42,6 @@ uint16_t USBKeyboard_readscancode(void);
 uint16_t USBGetkey(void);
 uint8_t USBGetModifiers(void);
 uint8_t USBGetOemKey(void);
+uint8_t getSCorKP(bool scORkp);
+char *cgets(char *s);
 #endif

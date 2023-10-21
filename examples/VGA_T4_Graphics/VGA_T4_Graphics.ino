@@ -9,7 +9,11 @@
 
 #include "VGA_4bit_T4.h"
 
-const vga_timing *timing = &t640x480x60;
+// Uncomment one of the following screen resolutions. Try them all:)
+//const vga_timing *timing = &t1024x768x60;
+//const vga_timing *timing = &t800x600x60;
+//const vga_timing *timing = &t640x480x60;
+const vga_timing *timing = &t640x400x70;
 FlexIO2VGA vga4bit;
 
 // Wait for frame update complete. If set to false, updates are very
@@ -111,7 +115,7 @@ void loop() {
     x0=random(fb_width);
     y0=random(fb_height);
     r=random(100);
-    vga4bit.drawCircle(x0,y0,r,random(16));
+    vga4bit.drawCircle(x0,y0,r,1,random(16));
   }	
 
   vga4bit.clear(VGA_BLACK); // Clear graphic screen

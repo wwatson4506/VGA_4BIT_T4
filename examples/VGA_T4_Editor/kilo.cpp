@@ -1,4 +1,4 @@
-/*** includes ***/
+// Teensy kilo Editor
 
 #define _DEFAULT_SOURCE
 #define _BSD_SOURCE

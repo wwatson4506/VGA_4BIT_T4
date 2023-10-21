@@ -8,6 +8,7 @@
 
 #define FONTSIZE 16
 
+// Uncomment one of the following screen resolutions. Try them all:)
 //const vga_timing *timing = &t1024x768x60;
 const vga_timing *timing = &t800x600x60;
 //const vga_timing *timing = &t640x480x60;
@@ -64,7 +65,7 @@ void setup() {
   // Get display dimensions
   vga4bit.getFbSize(&fb_width, &fb_height);
   // Set fontsize 8x16 or (8x8 available)
-  vga4bit.setFontSize(FONTSIZE);
+  vga4bit.setFontSize(FONTSIZE, false);
   // Set default foreground and background colors
   vga4bit.setBackgroundColor(VGA_BLUE); 
   vga4bit.setForegroundColor(VGA_BRIGHT_WHITE);
@@ -89,7 +90,7 @@ void loop() {
 }
 
 void drawGauge(uint16_t x, uint16_t y, uint16_t r) {
-  vga4bit.drawCircle(x, y, r, myColors[1]); //draw instrument container
+  vga4bit.drawCircle(x, y, r, 1, myColors[15]); //draw instrument container
   faceHelper(x, y, r, 150, 390, 1.3); //draw major ticks
   if (r > 15) faceHelper(x, y, r, 165, 375, 1.1); //draw minor ticks
 }

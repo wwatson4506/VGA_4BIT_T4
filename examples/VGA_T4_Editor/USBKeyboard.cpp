@@ -2,12 +2,15 @@
 // USBkeyboard.cpp
 // By: Warren Watson 2017-2023
 //=============================
+#include "VGA_4bit_T4.h"
+#include "VGA_T4_Config.h"
 #include "elapsedMillis.h"
 #include "USBHost_t36.h"
 #include "USBKeyboard.h"
 #include "IntervalTimer.h"
 
 extern USBHost myusb;
+extern FlexIO2VGA vga4bit;
 
 KeyboardController keyboard1(myusb);
 USBHIDParser hid1(myusb);
@@ -164,6 +167,67 @@ void OnRelease(int key)
 	keyboard_msg_p->last_keyCode = key;
 	keyboard_msg_p->keyCode = 0;
 	keyboard_msg_p->modifiers = 0;
+}
+
+//--------------------------------
+// Return a scancode or a keypress
+//--------------------------------
+uint8_t getSCorKP(bool scORkp) {
+	uint8_t scode = 0;
+	if(scORkp) { 
+		if(USBScancode_available()) {
+			scode = USBKeyboard_readscancode();
+			if(scode < 4 || scode > 39)
+				return scode;
+			else
+				return 0;
+		}
+	}
+	scode = (uint8_t)USBKeyboard_read();
+	return scode;	
+}
+
+//---------------------------------------------------------------------
+// Get a string from keyboard. Process control codes and function keys.
+//---------------------------------------------------------------------
+char *cgets(char *s)
+{
+	char *s1 = s;
+	int	c;
+	for(;;) {
+		switch(c = (uint8_t)USBGetkey()) {
+		case 194: // F1   Key
+		case 195: // F2   Key
+		case 196: // F3   Key
+		case 197: // F4   Key
+		case 198: // F5   Key
+		case 199: // F6   Key
+		case 200: // F7   Key
+		case 201: // F8   Key
+		case 202: // F9   Key
+		case 203: // F10  Key
+		case 204: // F11  Key
+		case 205: // F12  Key
+			*s = c;
+			return s;
+		case 127:
+			if(s == s1)
+				break;
+			s1--;
+			vga4bit.printf("%c",c);
+			break;
+		case '\n':
+		case '\r':
+			vga4bit.printf("%c",c);
+			*s1 = 0;
+			return s;
+		default:
+			if(c <= ASCII_7E)
+			vga4bit.printf("%c",c);
+			*s1++ = c;
+			break;
+		}
+	}
 }
 
 //==============================

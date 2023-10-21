@@ -6,7 +6,7 @@
 #include "kilo.h"
 
 // Uncomment to enable USB drive usage.
-//#define USE_USB_DRIVE 1
+#define USE_USB_DRIVE 1
 
 USBHost myusb;
 USBHub hub1(myusb);
@@ -39,45 +39,6 @@ static int fb_width, fb_height;
 #define FONTSIZE 16
 
 char sbuff[512];
-char *cgets(char *s)
-{
-	char *s1 = s;
-	int	c;
-	for(;;) {
-		switch(c = (uint8_t)USBGetkey()) {
-		case 194: // F1   Key
-		case 195: // F2   Key
-		case 196: // F3   Key
-		case 197: // F4   Key
-		case 198: // F5   Key
-		case 199: // F6   Key
-		case 200: // F7   Key
-		case 201: // F8   Key
-		case 202: // F9   Key
-		case 203: // F10  Key
-		case 204: // F11  Key
-		case 205: // F12  Key
-			*s = c;
-			return s;
-		case 127:
-			if(s == s1)
-				break;
-			s1--;
-			vga4bit.printf("%c",c);
-			break;
-		case '\n':
-		case '\r':
-			vga4bit.printf("%c",c);
-			*s1 = 0;
-			return s;
-		default:
-			if(c <= ASCII_7E)
-			vga4bit.printf("%c",c);
-			*s1++ = c;
-			break;
-		}
-	}
-}
 
 void setup() {
   Serial.begin(9600);
@@ -95,7 +56,7 @@ void setup() {
   // Get display dimensions
   vga4bit.getFbSize(&fb_width, &fb_height);
   // Set fontsize 8x8 or (8x16 available)
-  vga4bit.setFontSize(FONTSIZE);
+  vga4bit.setFontSize(FONTSIZE, false);
   // Set default foreground and background colors
   vga4bit.setBackgroundColor(VGA_BLUE); 
   // Clear Print Window
