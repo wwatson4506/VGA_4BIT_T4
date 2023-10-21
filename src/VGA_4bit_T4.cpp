@@ -1876,10 +1876,6 @@ FLASHMEM size_t FlexIO2VGA::write(const char *buffer, size_t size) {
 //==========================================
 FLASHMEM void FlexIO2VGA::slWrite(int16_t x,  uint16_t fgcolor,
                       uint16_t bgcolor, const char * text) {
-  int16_t tempX = cursor_x;
-  int16_t tempY = cursor_y;
-  int8_t tempBGColor = background_color;
-  int8_t tempFGColor = foreground_color;
   drawText(x*font_width,fb_height-font_height , text, fgcolor, bgcolor, VGA_DIR_RIGHT);
 }
 
