@@ -40,7 +40,6 @@ uint8_t *vbox_get(int16_t row1, int16_t col1, int16_t row2, int16_t col2) {
 
 void vbox_put(uint8_t *buf) {
   int16_t row1, col1, row2, col2;
-  int16_t width, height;  
   uint8_t *workbuf;
 	
   // get the coordinates back
@@ -50,9 +49,8 @@ void vbox_put(uint8_t *buf) {
   row2 = (uint16_t)((*workbuf++ << 8) + (*workbuf++ & 0xff));
   col2 = (uint16_t)((*workbuf++ << 8) + (*workbuf++ & 0xff));
   // calculate the dimensions in bytes
-  width  = ((col2 - col1)+1);
-  height = ((row2 - row1)+1);
-  // Write out each line of video
+
+	// Write out each line of video
   for(uint16_t i = row1; i < row2; i++) {
     for(uint16_t j = col1; j < col2+1; j++) {
       vga4bit.putChar(j, i, workbuf);
