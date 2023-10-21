@@ -55,8 +55,9 @@ Examples:
 - Grahics -- Demonstrates some of the graphic primitives like drawing circles, filled circles, triangles, filled triangles, rectangles, filled rectangles, ellipses and filled ellipses. Filled ellipses have a problem with filling out of bounds with certain parameter combinations have not figured out why yet. Example of fail: fillEllipse(516, 419,59,61,VGA_BRIGHT_WHITE). Resolution does not matter.
 - VGA_T4_Mandelbrot -- A uVGA example adapted to VGA_4BIT_T4. Finally drawing text in four different directions.
 - VGA_T4_treeDee -- Another Sumotoy example showing a rotating 3D framed cube.
+- VGA_T4_Box_Test -- Demonstrates allocating memory for saving and recalling sections of video memory. 
 
 All files are heavily commented.
 
-Again this is library is WIP and just for learning and playing with FlexIO2VGA capabilities...
+## Again this is library is WIP and just for learning and playing with FlexIO2VGA capabilities...
 
