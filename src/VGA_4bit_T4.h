@@ -173,8 +173,8 @@ typedef struct {
 // Graphic cursor struct.
 typedef struct {
   bool     active = false;  // gCursor on/off.
-  uint32_t gCursor_x;       // Pixel based.
-  uint32_t gCursor_y;       // Pixel based.
+  int16_t gCursor_x;       // Pixel based.
+  int16_t gCursor_y;       // Pixel based.
   uint8_t  char_under_cursor[256]; // Char save array.
   uint8_t  x_start;         // Cursor x start (0-7).
   uint8_t  y_start;         // Cursor y start (0-15).
@@ -297,8 +297,13 @@ public:
   void setDoubleWidth(bool doubleWidth);  
   void setDoubleHeight(bool doubleHeight);  
   void getFbSize(int *width, int *height);
+  
+  uint16_t getGwidth(void);
+  uint16_t getGheight(void);
   uint16_t getTwidth(void);
   uint16_t getTheight(void);
+  uint8_t  getFGC(void) { return foreground_color; }
+  uint8_t  getBGC(void) { return background_color; }
 
   // Initialize text settings
   void init_text_settings();
@@ -345,12 +350,12 @@ public:
   void drawLine(int x0, int y0, int x1, int y1, int color, bool no_last_pixel);
   void drawRect(int x0, int y0, int x1, int y1, int color);
   void fillRect(int x0, int y0, int x1, int y1, int color);
-  void drawCircle(int xm, int ym, int r, int color);
-  void fillCircle(int xm, int ym, int r, int color);
+  void drawCircle(float x, float y, float radius, float thickness, uint8_t color);
+  void fillCircle(float xm, float ym, float r, uint8_t color);
   void drawTriangle(int x0, int y0, int x1, int y1, int x2, int y2, int color);
   void fillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, int color);
   void drawEllipse(int _x0, int _y0, int _x1, int _y1, int color);
-  void fillEllipse(int x0, int y0, int x1, int y1, int color);
+  void fillEllipse(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color);
   void drawBitmap(int16_t x_pos, int16_t y_pos, uint8_t *bitmap, int16_t bitmap_width, int16_t bitmap_height);
   void copy(int s_x, int s_y, int d_x, int d_y, int w, int h);
 
@@ -367,7 +372,7 @@ public:
   void scroll(int x, int y, int w, int h, int dx, int dy,int col);
   void drawText(int16_t x, int16_t y, const char * text, uint8_t fgcolor, uint8_t bgcolor);
   void drawText(int16_t x, int16_t y, const char * text, uint8_t fgcolor, uint8_t bgcolor, vga_text_direction dir);
-  int  setFontSize(uint8_t fsize);  
+  int  setFontSize(uint8_t fsize, bool runflag);  
   int  getFontWidth(void) { return font_width; }
   int  getFontHeight(void) { return font_height; }
   void setForegroundColor(int8_t fg_color); // RGBI format
@@ -378,6 +383,8 @@ public:
   uint8_t getTextBGC(void) { return background_color; }
   uint8_t getTextFGC(void) { return foreground_color; }
   void textColor(uint8_t fgc, uint8_t bgc);
+  void setPromptSize(uint16_t ps); 
+ 
   virtual size_t write(const char *buffer, size_t size);
   virtual size_t write(uint8_t c);
 
@@ -391,6 +398,8 @@ public:
   void clearStatusLine(uint8_t bgc);
   void slWrite(int16_t x,  uint16_t fgcolor, uint16_t bgcolor, const char * text);
 
+  uint16_t promp_size = 0;
+  
 private:
   void set_clk(int num, int den);
   static void ISR(void);

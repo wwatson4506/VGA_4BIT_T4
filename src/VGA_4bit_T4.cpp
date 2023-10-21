@@ -47,7 +47,7 @@
  *                                                |
  * T4-12 <---536R --------------------------------/
  *
- * GROUND <------------- 536R ----*---- 270R -----*---------> VGA PIN: Blue pin 3
+ * GROUND <------------- 536R ----*---- 270R -----*---------> VGA PIN: Blue pin3
  *                                |               |
  * INTENSITY (13) <---536R -------/               |
  *                                                |
@@ -394,6 +394,16 @@ FLASHMEM void FlexIO2VGA::getFbSize(int *width, int *height) {
 //------------------------
 // Get frame buffer width.
 //------------------------
+uint16_t FlexIO2VGA::getGwidth(void) { return fb_width; }
+
+//-------------------------
+// Get frame buffer height.
+//-------------------------
+uint16_t FlexIO2VGA::getGheight(void) { return fb_height; }
+
+//------------------------
+// Get frame buffer width.
+//------------------------
 FLASHMEM uint16_t  FlexIO2VGA::getTwidth(void) { return fb_width/font_width; }
 
 //-------------------------
@@ -418,6 +428,7 @@ FLASHMEM void FlexIO2VGA::clear(uint8_t fg) {
     }
   }
   getChar(tCursorX(),tCursorY(),tCursor.char_under_cursor);
+  getGptr(gCursor.gCursor_x,gCursor.gCursor_y,gCursor.char_under_cursor);
 }
 
 //===================================
@@ -426,6 +437,7 @@ FLASHMEM void FlexIO2VGA::clear(uint8_t fg) {
 FLASHMEM void FlexIO2VGA::cursorOn(void) {
   tCursor.active = true;	
 //  drawCursor(foreground_color);
+//  getGptr(gCursor.gCursor_x,gCursor.gCursor_y,gCursor.char_under_cursor);
   getChar(tCursorX(),tCursorY(),tCursor.char_under_cursor);
 }
 
@@ -490,7 +502,7 @@ void FlexIO2VGA::setCursorBlink(bool onOff) {
 //=====================================================
 void FlexIO2VGA::setCursorType(uint8_t cursorType) {
   gCursor.type = cursorType;
-  moveGcursor(gCursor.gCursor_x,gCursor.gCursor_y);
+  getGptr(gCursor.gCursor_x,gCursor.gCursor_y,gCursor.char_under_cursor);
 }
 
 //=============================================
@@ -512,6 +524,7 @@ FLASHMEM void FlexIO2VGA::initGcursor(uint8_t type, uint8_t xStart,
   gCursor.y_end   = yEnd;
   gCursor.type    = type;
   getGptr(gCursor.gCursor_x,gCursor.gCursor_y,gCursor.char_under_cursor);
+  moveGcursor(gCursor.gCursor_x,gCursor.gCursor_y);
 }
 
 //======================================================
@@ -668,6 +681,7 @@ FLASHMEM void FlexIO2VGA::drawLine(int x0, int y0, int x1, int y1, int color, bo
 //===================================================================
 inline void FlexIO2VGA::drawHLineFast(int y, int x1, int x2, int color) {
   _fb = s_frameBuffer[frameBufferIndex];
+
   while(x1 <= x2) {
     unsigned int sel = (x1 & 1) << 2; // 4 or 0
     uint8_t c = getByte(x1/2,y); // Get current 4 bit pixel pair. 
@@ -686,6 +700,7 @@ inline void FlexIO2VGA::drawHLineFast(int y, int x1, int x2, int color) {
 //=================================================================
 inline void FlexIO2VGA::drawVLineFast(int x, int y1, int y2, int color) {
   _fb = s_frameBuffer[frameBufferIndex];
+
   while(y1 <= y2) {
     unsigned int sel = (x & 1) << 2; // 4 or 0
     uint8_t c = getByte(x/2,y1); // Get current 4 bit pixel pair. 
@@ -702,10 +717,16 @@ inline void FlexIO2VGA::drawVLineFast(int x, int y1, int y2, int color) {
 // Draw a rectangle.
 //==================
 FLASHMEM void FlexIO2VGA::drawRect(int x0, int y0, int x1, int y1, int color) {
+  bool wasActive = false;
+  if(gCursor.active) {
+    gCursorOff(); // Must turn of software driven graphic cursor if on !!
+    wasActive = true;
+  }
   drawHLine(y0, x0, x1, color);
   drawHLine(y1, x0, x1, color);
   drawVLine(x0, y0, y1, color);
   drawVLine(x1, y0, y1, color);
+  if(wasActive) gCursorOn();
 }
 
 //=========================
@@ -713,6 +734,11 @@ FLASHMEM void FlexIO2VGA::drawRect(int x0, int y0, int x1, int y1, int color) {
 //=========================
 FLASHMEM void FlexIO2VGA::fillRect(int x0, int y0, int x1, int y1, int color) {
   int t;
+  bool wasActive = false;
+  if(gCursor.active) {
+    gCursorOff(); // Must turn of software driven graphic cursor if on !!
+    wasActive = true;
+  }
   x0 = clip_x(x0);
   y0 = clip_y(y0);
   x1 = clip_x(x1);
@@ -720,18 +746,25 @@ FLASHMEM void FlexIO2VGA::fillRect(int x0, int y0, int x1, int y1, int color) {
   // increase speed if the rectangle is a single pixel, horizontal or vertical line
   if( (x0 == x1) ) {
     if(y0 == y1) {
+if(wasActive) gCursorOn();
       return drawPixel(x0, y0, color);
     } else {
-      if(y0 < y1)
+      if(y0 < y1) {
+if(wasActive) gCursorOn();
         return drawVLineFast(x0, y0, y1, color);
-      else
+      } else {
+  if(wasActive) gCursorOn();
         return drawVLineFast(x0, y1, y0, color);
+      }
     }
   } else if(y0 == y1) {
-    if(x0 < x1)
+    if(x0 < x1) {
+if(wasActive) gCursorOn();
       return drawHLineFast(y0, x0, x1, color);
-    else
+    } else {
+if(wasActive) gCursorOn();
       return drawHLineFast(y0, x1, x0, color);
+    }
   }
   if( x0 > x1 ) {
     t = x0;
@@ -747,6 +780,7 @@ FLASHMEM void FlexIO2VGA::fillRect(int x0, int y0, int x1, int y1, int color) {
     drawHLineFast(y0, x0, x1, color);
     y0++;
   }
+  if(wasActive) gCursorOn();
 }
 
 //===========================================================
@@ -820,35 +854,41 @@ void FlexIO2VGA::drawBitmap(int16_t x_pos, int16_t y_pos, uint8_t *bitmap, int16
 //==================
 // Draw a circle.
 //==================
-FLASHMEM void FlexIO2VGA::drawCircle(int xm, int ym, int r, int color) {
-  int x = -r;
-  int y = 0;
-  int err = 2-2*r; // II. Quadrant 
-  do {
-    drawPixel(xm-x, ym+y, color); //   I. Quadrant 
-    drawPixel(xm-y, ym-x, color); //  II. Quadrant
-    drawPixel(xm+x, ym-y, color); // III. Quadrant
-    drawPixel(xm+y, ym+x, color); //  IV. Quadrant
+FLASHMEM void FlexIO2VGA::drawCircle(float x, float y, float radius, float thickness, uint8_t color) {
+  int16_t xi, yi;
+  float sq_radius = radius + thickness;
 
-    r = err;
-    if(r <= y) {
-      y++;
-      err += y * 2 + 1;			  // e_xy+e_y < 0
-    }
+  bool wasActive = false;
+  if(gCursor.active) {
+    gCursorOff(); // Must turn of software driven graphic cursor if on !!
+    wasActive = true;
+  }
 
-    if((r > x) || (err > y)) {
-      x++;
-      err += x * 2 + 1; // e_xy+e_x > 0 or no 2nd y-step
+  for (xi = -sq_radius; xi < sq_radius; xi++) {
+    uint8_t found_state = 0;
+    for (yi = -sq_radius; yi < sq_radius; yi++) {
+      const float r = sqrtf(xi * xi + yi * yi);
+      if(fabs(r - radius) <= thickness) {
+        if(found_state == 0) found_state = 1;
+        if(found_state == 2) found_state = 3;
+          vga4bit.drawPixel(x + xi, y + yi, color);
+      } else if(found_state == 1) {
+        yi = -yi;
+        found_state = 2;
+      } else if(found_state == 3) {
+        break;
+      }
     }
-  } while(x < 0);
+  }
+  if(wasActive) gCursorOn();
 }
 
 //======================
 // Draw a circle filled.
 //======================
-FLASHMEM void FlexIO2VGA::fillCircle(int xm, int ym, int r, int color) {
-  int x, y;
-
+FLASHMEM void FlexIO2VGA::fillCircle(float xm, float ym, float r, uint8_t color) {
+  drawCircle(xm, ym, r, r, color);
+/*
   for(y = -r; y <= r; y++) {
     for(x = -r; x <= r; x++) {
       if((x * x) + (y * y) <= (r * r)) {
@@ -858,15 +898,22 @@ FLASHMEM void FlexIO2VGA::fillCircle(int xm, int ym, int r, int color) {
       }
     }
   }
+*/
 }
 
 //=================
 // draw a triangle
 //=================
 FLASHMEM void FlexIO2VGA::drawTriangle(int x0, int y0, int x1, int y1, int x2, int y2, int color) {
+  bool wasActive = false;
+  if(gCursor.active) {
+    gCursorOff(); // Must turn of software driven graphic cursor if on !!
+    wasActive = true;
+  }
   drawLinex(x0, y0, x1, y1, color);
   drawLinex(x1, y1, x2, y2, color);
   drawLinex(x2, y2, x0, y0, color);
+  if(wasActive) gCursorOn();
 }
 
 //=====================================================
@@ -880,6 +927,12 @@ FLASHMEM void FlexIO2VGA::fillTriangle(int x1, int y1, int x2, int y2, int x3, i
   bool changed2 = false;
   int signx1, signx2, dx1, dy1, dx2, dy2;
   int e1, e2;
+
+  bool wasActive = false;
+  if(gCursor.active) {
+    gCursorOff(); // Must turn of software driven graphic cursor if on !!
+    wasActive = true;
+  }
 
   // Sort vertices
   if (y1 > y2) {
@@ -1043,8 +1096,12 @@ next4:
     if(!changed2) t2x += signx2;
     t2x += t2xp;
     y += 1;
-    if(y > y3) return;
+    if(y > y3) {
+      if(wasActive) gCursorOn();
+      return;
+    }
   }
+  if(wasActive) gCursorOn();
 }
 
 //==============================================================
@@ -1054,6 +1111,18 @@ next4:
 // ************* Fails with certain params ********************
 //==============================================================
 FLASHMEM void FlexIO2VGA::drawEllipse(int _x0, int _y0, int _x1, int _y1, int color) {
+  //----------------------------------------
+  // Added the following:
+  //----------------------------------------
+  int tx, ty;
+  tx = _x1;
+  ty = _y1;
+  _x1 += _x0;
+  _y1 += _y0;
+  _x0 -= tx;
+  _y0 -= ty;
+  //----------------------------------------
+
   int halfHeight = abs(_y0 - _y1) / 2;
   int halfWidth = abs(_x0 - _x1) / 2;
   int x0 = (_x0 < _x1 ? _x0 : _x1);
@@ -1067,6 +1136,12 @@ FLASHMEM void FlexIO2VGA::drawEllipse(int _x0, int _y0, int _x1, int _y1, int co
   long dy = 4 * (b1 + 1) * a * a; // error increment
   long err = dx + dy + b1 * a * a;
   long e2; // error of 1.step
+
+  bool wasActive = false;
+  if(gCursor.active) {
+    gCursorOff(); // Must turn of software driven graphic cursor if on !!
+    wasActive = true;
+  }
   // if x1,y1 is not the correct edge, try... something
   if(x0 > x1) {
     x0 = x1;
@@ -1105,6 +1180,7 @@ FLASHMEM void FlexIO2VGA::drawEllipse(int _x0, int _y0, int _x1, int _y1, int co
     drawPixel(x0 - 1, y1, color);
     drawPixel(x1 + 1, y1--, color); 
   }
+  if(wasActive) gCursorOn();
 }
 
 //==============================================================
@@ -1115,24 +1191,47 @@ FLASHMEM void FlexIO2VGA::drawEllipse(int _x0, int _y0, int _x1, int _y1, int co
 // Example: vga4bit.fillEllipse(516,419,59,61,VGA_BRIGHT_WHITE);
 //          vga_timing = t640x480x60. FAILS...
 //==============================================================
-FLASHMEM void FlexIO2VGA::fillEllipse(int x0, int y0, int x1, int y1, int color) {
+FLASHMEM void FlexIO2VGA::fillEllipse(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color) {
   int x;
   int y;
-  int halfHeight = abs(y0 - y1) / 2;
-  int halfWidth = abs(x0 - x1) / 2;
-  int center_x = (x0 < x1 ? x0 : x1) + halfWidth;
-  int center_y = (y0 < y1 ? y0 : y1) + halfHeight;
-  for(y = -halfHeight; y <= 0; y++) {
-    for(x = -halfWidth; x <= 0; x++) {
-      if( (x * x * halfHeight * halfHeight + y * y * halfWidth * halfWidth) <=
-        (halfHeight * halfHeight * halfWidth * halfWidth)) {
+
+  //----------------------------------------
+  // Added the following:
+  //----------------------------------------
+  int tx, ty;
+  tx = x1;
+  ty = y1;
+  x1 += x0;
+  y1 += y0;
+  x0 -= tx;
+  y0 -= ty;
+  //----------------------------------------
+
+  int half_height = abs(y0 - y1) / 2;
+  int half_width = abs(x0 - x1) / 2;
+  int center_x = (x0 < x1 ? x0 : x1) + half_width;
+  int center_y = (y0 < y1 ? y0 : y1) + half_height;
+
+//x*height*x*height+y*width*y*width <= width*height*width*height
+  bool wasActive = false;
+  if(gCursor.active) {
+    gCursorOff(); // Must turn of software driven graphic cursor if on !!
+    wasActive = true;
+  }
+
+  for(y = -half_height; y <= 0; y++) {
+    for(x = -half_width; x <= 0; x++) {
+      if( (x * x * half_height * half_height + y * y * half_width * half_width) <=
+          (half_height * half_height * half_width * half_width)) {
         drawHLine(center_y + y, center_x + x, center_x - x, color);
         if(y != 0) drawHLine(center_y - y, center_x + x, center_x - x, color);
-        break;
+          break;
       }
     }
   }
+  if(wasActive) gCursorOn();
 }
+
 
 // ------------------------------------------------------
 // copy area s_x,s_y of w*h pixels to destination d_x,d_y
@@ -1255,7 +1354,7 @@ FLASHMEM void FlexIO2VGA::init_text_settings() {
 
   font_width = 8;	// font width != 8 is not supported
   font_height = 16;
-  
+  promp_size = 0;  
   print_window_x = 0;
   print_window_y = 0;
   print_window_w = fb_width / font_width;
@@ -1270,6 +1369,7 @@ FLASHMEM void FlexIO2VGA::init_text_settings() {
   tCursor.tCursor_y = 0;
   tCursor.active = false;
   vga4bit.initCursor(1,0,8,8,true,30); 
+  vga4bit.initGcursor(1,1,0,8,8);
 }
 
 //====================================================
@@ -1310,7 +1410,8 @@ FLASHMEM void FlexIO2VGA::putChar(int16_t x, int16_t y, uint8_t *buf) {
 // font_height * 2 (compensate for font_width / 2).
 //====================================================
 FLASHMEM void FlexIO2VGA::getGptr(int16_t x, int16_t y, uint8_t *buf) {
-  for(int16_t i = 0; i < font_height*2+1; i++) {
+//  for(int16_t i = 0; i < font_height*2+1; i++) {
+  for(int16_t i = 0; i < font_height; i++) {
     for(int16_t j = 0; j < (font_width/2)+1; j++) {
       *buf++ = getByte((x/2)+j, y+i);
     }
@@ -1325,7 +1426,8 @@ FLASHMEM void FlexIO2VGA::getGptr(int16_t x, int16_t y, uint8_t *buf) {
 // font_height * 2 (compensate for font_width / 2).
 //====================================================
 FLASHMEM void FlexIO2VGA::putGptr(int16_t x, int16_t y, uint8_t *buf) {
-  for(int16_t i = 0; i < font_height*2+1; i++) {
+//  for(int16_t i = 0; i < font_height*2+1; i++) {
+  for(int16_t i = 0; i < font_height; i++) {
     for(int16_t j = 0; j < (font_width/2)+1; j++) {
       putByte((x/2)+j, y+i, *buf++);
     }
@@ -1366,7 +1468,6 @@ FLASHMEM void FlexIO2VGA::writeVmem(uint8_t *buf, uint32_t vMem, uint32_t count)
   }	
 }
 	  
-
 //========================================
 //  Read a count bytes from linear memory.
 //========================================
@@ -1378,13 +1479,24 @@ FLASHMEM void FlexIO2VGA::readVmem(uint32_t vMem, uint8_t *buf, int32_t count) {
   }
 }
 
+//====================
+// Set prompt size.
+// Default prompt ">".
+//====================
+FLASHMEM void FlexIO2VGA::setPromptSize(uint16_t ps) {
+//  promp_size = (ps * font_width) + print_window_w;	
+  promp_size = (ps * font_width);	
+}
+
 //===========================================
 // Set font size. Just selecting font height.
 // Valid sizes: 8 or 16 for now.
 //===========================================
-FLASHMEM int FlexIO2VGA::setFontSize(uint8_t fsize) {
+FLASHMEM int FlexIO2VGA::setFontSize(uint8_t fsize, bool runflag) {
   if((fsize != 8) && (fsize != 16)) return -1;
   font_height = fsize;	
+  promp_size = 0;
+  if(!runflag) clear(background_color);
   return (int)fsize;
 }
 
@@ -1484,6 +1596,7 @@ FLASHMEM void FlexIO2VGA::clearPrintWindow() {
   cursor_x = 0;
   cursor_y = 0;
   getChar(tCursorX(),tCursorY(),tCursor.char_under_cursor);
+  getGptr(gCursor.gCursor_x,gCursor.gCursor_y,gCursor.char_under_cursor);
 }
 
 //=====================
@@ -1552,6 +1665,7 @@ FLASHMEM void FlexIO2VGA::drawCursor(int color) {
 FLASHMEM void FlexIO2VGA::textxy(int column, int line) {
   bool isActive = false;
   if(tCursor.active) isActive = true;
+  getChar(tCursorX(),tCursorY(),tCursor.char_under_cursor);
   cursorOff();
   if(column < 0)
     cursor_x = 0;
@@ -1575,13 +1689,15 @@ FLASHMEM void FlexIO2VGA::textxy(int column, int line) {
 // based on font sizes 8x8 or 8x16. (8x16 max)
 //================================================
 FLASHMEM void FlexIO2VGA::drawGcursor(int color) {
-  getGptr(gCursor.gCursor_x,gCursor.gCursor_y,gCursor.char_under_cursor);
-  if(gCursor.type == BLOCK_CURSOR) {
-    fillRect(gCursor.gCursor_x+gCursor.x_start, gCursor.gCursor_y+gCursor.y_start,
-             gCursor.gCursor_x+gCursor.x_end-1, gCursor.gCursor_y+gCursor.y_end-1,
-             color);
-  } else {
-    drawBitmap(gCursor.gCursor_x, gCursor.gCursor_y, (uint8_t *)arrow[gCursor.type], 8, 16);
+  if(gCursor.active) {
+    getGptr(gCursor.gCursor_x,gCursor.gCursor_y,gCursor.char_under_cursor);
+    if(gCursor.type == BLOCK_CURSOR) {
+      fillRect(gCursor.gCursor_x+gCursor.x_start, gCursor.gCursor_y+gCursor.y_start,
+               gCursor.gCursor_x+gCursor.x_end-1, gCursor.gCursor_y+gCursor.y_end-1,
+               color);
+    } else {
+      drawBitmap(gCursor.gCursor_x, gCursor.gCursor_y, (uint8_t *)arrow[gCursor.type], 8, 16);
+    }
   }
 }
 
@@ -1589,10 +1705,12 @@ FLASHMEM void FlexIO2VGA::drawGcursor(int color) {
 // Move graphic cursor position to column/line.
 //=============================================
 FLASHMEM void FlexIO2VGA::moveGcursor(int16_t column, int16_t line) {
-  putGptr(gCursor.gCursor_x,gCursor.gCursor_y,gCursor.char_under_cursor);
-  gCursor.gCursor_x = column;
-  gCursor.gCursor_y = line;
-  drawGcursor(foreground_color);
+  if(gCursor.active) {
+    putGptr(gCursor.gCursor_x,gCursor.gCursor_y,gCursor.char_under_cursor);
+    gCursor.gCursor_x = column;
+    gCursor.gCursor_y = line;
+    drawGcursor(foreground_color);
+  }
 }
 
 //======================================================================
@@ -1762,19 +1880,23 @@ FLASHMEM void FlexIO2VGA::slWrite(int16_t x,  uint16_t fgcolor,
   int16_t tempY = cursor_y;
   int8_t tempBGColor = background_color;
   int8_t tempFGColor = foreground_color;
-
-  textColor(fgcolor,bgcolor);
-  textxy(x,print_window_h);
-  write(text,strlen(text));
-  textxy(tempX,tempY);
-  textColor(tempFGColor,tempBGColor);
+  drawText(x*font_width,fb_height-font_height , text, fgcolor, bgcolor, VGA_DIR_RIGHT);
 }
 
-//==========================================
-// Clear the status line.
-//==========================================
+//==========+================================
+// Clear the status line. The 800x600 mode
+// needs fb_height adjusted to 600 - 8 as
+// 600 / (font_height == 16) = 37.5 character
+// lines. We subtract 8 from fb_height to get
+// an even 37 character lines. A font_height
+// of 8 gives an even 75 character lines.
+//=========+=================================
 FLASHMEM void FlexIO2VGA::clearStatusLine(uint8_t bgc) {
-  fillRect(0, fb_height-font_height, fb_width, fb_height,background_color);	
+  if((fb_height == 600) && (font_height == 16)) {
+    fillRect(0, fb_height-font_height-8, fb_width, fb_height-8,bgc);
+  } else {
+	fillRect(0, fb_height-font_height, fb_width, fb_height,bgc);	
+  }
 }
 
 //==========================================
