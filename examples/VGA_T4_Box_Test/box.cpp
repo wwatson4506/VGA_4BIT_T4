@@ -18,7 +18,8 @@ uint8_t *vbox_get(int16_t row1, int16_t col1, int16_t row2, int16_t col2) {
     while(1);
   }
 
-  // save the box coordinates in the buffer
+  // Save the box coordinates in the buffer.
+  // First 8 bytes used to store four 16 bit coorrdinates.
   bufptr = buf;
   *bufptr++ = (uint8_t)((row1 >> 8) & 0xff);
   *bufptr++ = (uint8_t)(row1 & 0xff);
@@ -44,13 +45,14 @@ void vbox_put(uint8_t *buf) {
 	
   // get the coordinates back
   workbuf = buf;
-  row1 = (uint16_t)((*workbuf++ << 8) + (*workbuf++ & 0xff));
-  col1 = (uint16_t)((*workbuf++ << 8) + (*workbuf++ & 0xff));
-  row2 = (uint16_t)((*workbuf++ << 8) + (*workbuf++ & 0xff));
-  col2 = (uint16_t)((*workbuf++ << 8) + (*workbuf++ & 0xff));
-  // calculate the dimensions in bytes
+  // Convert 8 bit pairs to 16 bit coords (Big Endian).
+  row1 = (uint16_t)((workbuf[0] << 8) + (workbuf[1] & 0xff));
+  col1 = (uint16_t)((workbuf[2] << 8) + (workbuf[3] & 0xff));
+  row2 = (uint16_t)((workbuf[4] << 8) + (workbuf[5] & 0xff));
+  col2 = (uint16_t)((workbuf[8] << 8) + (workbuf[7] & 0xff));
+  workbuf+=8; // Skip over coords to data.
 
-	// Write out each line of video
+  // Write out each line of video
   for(uint16_t i = row1; i < row2; i++) {
     for(uint16_t j = col1; j < col2+1; j++) {
       vga4bit.putChar(j, i, workbuf);
