@@ -325,14 +325,14 @@ void FlexIO2VGA::TimerInterrupt(void) {
       if(!(frameCount % tCursor.blink_rate)) {
         tCursor.toggle ^= true;
         if(tCursor.toggle) {
-          drawCursor(foreground_color);
+          drawTcursor(tCursor.color);
         } else {
           putChar(tCursorX(),tCursorY(),tCursor.char_under_cursor);
         }
       }
     } else {
 
-      drawCursor(foreground_color);
+      drawTcursor(tCursor.color);
     }
   }
   fbUpdate(false); // Must be false else endless loop occurs.
@@ -434,19 +434,16 @@ FLASHMEM void FlexIO2VGA::clear(uint8_t fg) {
 //===================================
 // Turn cursor on and display cursor.
 //===================================
-FLASHMEM void FlexIO2VGA::cursorOn(void) {
+FLASHMEM void FlexIO2VGA::tCursorOn(void) {
   tCursor.active = true;	
-//  drawCursor(foreground_color);
-//  getGptr(gCursor.gCursor_x,gCursor.gCursor_y,gCursor.char_under_cursor);
   getChar(tCursorX(),tCursorY(),tCursor.char_under_cursor);
 }
 
 //===============================================
 // Turn cursor off and kill any displayed cursor.
 //===============================================
-FLASHMEM void FlexIO2VGA::cursorOff(void) {
+FLASHMEM void FlexIO2VGA::tCursorOff(void) {
   tCursor.active = false;	
-//  drawCursor(background_color);
   putChar(tCursorX(),tCursorY(),tCursor.char_under_cursor);
 }
 
@@ -456,7 +453,7 @@ FLASHMEM void FlexIO2VGA::cursorOff(void) {
 FLASHMEM void FlexIO2VGA::gCursorOn(void) {
   gCursor.active = true;	
   getGptr(gCursor.gCursor_x,gCursor.gCursor_y,gCursor.char_under_cursor);
-  drawGcursor(foreground_color);
+  drawGcursor(gCursor.color);
 }
 
 //===============================================
@@ -486,7 +483,18 @@ FLASHMEM void FlexIO2VGA::initCursor(uint8_t xStart, uint8_t yStart, uint8_t xEn
   tCursor.x_end   = xEnd;
   tCursor.y_start = yStart;
   tCursor.y_end   = yEnd;
+  tCursor.color   = foreground_color;
   getChar(tCursorX(),tCursorY(),tCursor.char_under_cursor);
+}
+
+
+//=====================================
+// Set text cursor color.
+//=====================================
+void FlexIO2VGA::setTcursorColor(uint8_t cursorColor) {
+  tCursor.color = cursorColor;
+  putChar(tCursorX(),tCursorY(),tCursor.char_under_cursor);
+  drawTcursor(tCursor.color);
 }
 
 //=====================================
@@ -502,7 +510,17 @@ void FlexIO2VGA::setCursorBlink(bool onOff) {
 //=====================================================
 void FlexIO2VGA::setCursorType(uint8_t cursorType) {
   gCursor.type = cursorType;
-  getGptr(gCursor.gCursor_x,gCursor.gCursor_y,gCursor.char_under_cursor);
+  putGptr(gCursor.gCursor_x,gCursor.gCursor_y,gCursor.char_under_cursor);
+  drawGcursor(gCursor.color);
+}
+
+//=====================================
+// Set graphic cursor color.
+//=====================================
+void FlexIO2VGA::setGcursorColor(uint8_t cursorColor) {
+  gCursor.color = cursorColor;
+  putGptr(gCursor.gCursor_x,gCursor.gCursor_y,gCursor.char_under_cursor);
+  drawGcursor(gCursor.color);
 }
 
 //=============================================
@@ -523,6 +541,7 @@ FLASHMEM void FlexIO2VGA::initGcursor(uint8_t type, uint8_t xStart,
   gCursor.y_start = yStart;
   gCursor.y_end   = yEnd;
   gCursor.type    = type;
+  gCursor.color   = foreground_color;
   getGptr(gCursor.gCursor_x,gCursor.gCursor_y,gCursor.char_under_cursor);
   moveGcursor(gCursor.gCursor_x,gCursor.gCursor_y);
 }
@@ -539,6 +558,37 @@ uint16_t FlexIO2VGA::tCursorY(void) { return cursor_y+(print_window_y/font_heigh
 uint16_t FlexIO2VGA::gCursorX(void) { return gCursor.gCursor_x; }
 uint16_t FlexIO2VGA::gCursorY(void) { return gCursor.gCursor_y; }
 
+//=============================================
+// Set block cursor dimensions.
+// xStart = cursor starting x position.
+// yStart = cursor starting y position.
+// xEnd   = cursor ending x position.
+// yEnd   = cursor ending y position.
+// type   0 = text, 1 = graphic else -1 error.
+//==============================================
+FLASHMEM int8_t FlexIO2VGA::setBlkCursorDims(uint8_t xStart,
+                                      uint8_t yStart, uint8_t xEnd,
+                                      uint8_t yEnd,uint8_t type) {	
+  switch(type) {
+    case 0:
+      tCursor.x_start = xStart;
+      tCursor.x_end   = xEnd;
+      tCursor.y_start = yStart;
+      tCursor.y_end   = yEnd;
+      break;
+    case 1:
+      gCursor.x_start = xStart;
+      gCursor.x_end   = xEnd;
+      gCursor.y_start = yStart;
+      gCursor.y_end   = yEnd;
+      break;
+    default:
+      return -1; // Type not supported.
+  }
+  putGptr(gCursor.gCursor_x,gCursor.gCursor_y,gCursor.char_under_cursor);
+  drawGcursor(gCursor.color);
+  return 0;
+}
 //========================================
 // drawPixel()
 // fb is pointer to selected frame buffer.
@@ -1351,6 +1401,8 @@ FLASHMEM void FlexIO2VGA::init_text_settings() {
 
   foreground_color = VGA_BRIGHT_WHITE;
   background_color = VGA_BLUE;
+  SaveRVFGC = VGA_BRIGHT_WHITE;
+  SaveRVBGC = VGA_BLUE;
   transparent_background = false;
   clear(background_color);
 
@@ -1358,7 +1410,7 @@ FLASHMEM void FlexIO2VGA::init_text_settings() {
   tCursor.tCursor_y = 0;
   tCursor.active = false;
   vga4bit.initCursor(1,0,8,8,true,30); 
-  vga4bit.initGcursor(1,1,0,8,8);
+  vga4bit.initGcursor(0,1,0,8,8);
 }
 
 //====================================================
@@ -1642,7 +1694,7 @@ FLASHMEM void FlexIO2VGA::updateTCursor(int column, int line) {
 // Cursor size vertically and horizontally are
 // based on font sizes 8x8 or 8x16. (8x16 max)
 //================================================
-FLASHMEM void FlexIO2VGA::drawCursor(int color) {
+FLASHMEM void FlexIO2VGA::drawTcursor(int color) {
   fillRect(tCursor.tCursor_x+tCursor.x_start, tCursor.tCursor_y+tCursor.y_start,
            tCursor.tCursor_x+tCursor.x_end-1, tCursor.tCursor_y+tCursor.y_end-1,
            color);
@@ -1655,7 +1707,7 @@ FLASHMEM void FlexIO2VGA::textxy(int column, int line) {
   bool isActive = false;
   if(tCursor.active) isActive = true;
   getChar(tCursorX(),tCursorY(),tCursor.char_under_cursor);
-  cursorOff();
+  tCursorOff();
   if(column < 0)
     cursor_x = 0;
   else if(column >= print_window_w)
@@ -1669,7 +1721,7 @@ FLASHMEM void FlexIO2VGA::textxy(int column, int line) {
   else
    cursor_y = line;
   updateTCursor(cursor_x, cursor_y);
-  if(isActive) cursorOn();
+  if(isActive) tCursorOn();
 }
 
 //================================================
@@ -1683,7 +1735,7 @@ FLASHMEM void FlexIO2VGA::drawGcursor(int color) {
     if(gCursor.type == BLOCK_CURSOR) {
       fillRect(gCursor.gCursor_x+gCursor.x_start, gCursor.gCursor_y+gCursor.y_start,
                gCursor.gCursor_x+gCursor.x_end-1, gCursor.gCursor_y+gCursor.y_end-1,
-               color);
+               gCursor.color);
     } else {
       drawBitmap(gCursor.gCursor_x, gCursor.gCursor_y, (uint8_t *)arrow[gCursor.type], 8, 16);
     }
@@ -1798,7 +1850,7 @@ FLASHMEM size_t FlexIO2VGA::write(uint8_t c) {
 
   // If cursor is active, set flag and turn off cursor.
   if(tCursor.active) {
-    cursorOff();
+    tCursorOff();
     isActive = true;
   }
   switch(c) {
@@ -1847,7 +1899,7 @@ FLASHMEM size_t FlexIO2VGA::write(uint8_t c) {
       cursor_x++;
   }
   updateTCursor(cursor_x, cursor_y);
-  if(isActive) cursorOn();
+  if(isActive) tCursorOn();
   return 1;
 }
 
@@ -1895,7 +1947,7 @@ void FlexIO2VGA::fbUpdate(bool wait) {
 //==================================================
 // Support function for VT100: Clear to End Of Line.
 //==================================================
-void FlexIO2VGA::clreol(void) {
+FLASHMEM void FlexIO2VGA::clreol(void) {
   int16_t tempX = cursor_x;
   int16_t tempY = cursor_y;
   bool isActive = false;
@@ -1903,18 +1955,17 @@ void FlexIO2VGA::clreol(void) {
 
   for(int i = 0; i < (print_window_w-tempX); i++) {
 	write(0x20);
-    cursorOff();
+    tCursorOff();
   }
   textxy(tempX,tempY);
-  if(isActive) cursorOn();
+  if(isActive) tCursorOn();
 
 }
 
 //====================================================
 // Support function for VT100: Clear to End Of Screen.
 //====================================================
-void FlexIO2VGA::clreos(void)
-{
+FLASHMEM void FlexIO2VGA::clreos(void) {
   int16_t tempX = cursor_x;
   int16_t tempY = cursor_y;
 
@@ -1928,14 +1979,13 @@ void FlexIO2VGA::clreos(void)
       write(0x20); 
 
   textxy(tempX,tempY);
-  if(isActive) cursorOn();
+  if(isActive) tCursorOn();
 }
 
 //========================================================
 // Support function for VT100: Clear to beginning of line.
 //========================================================
-void FlexIO2VGA::clrbol(void)
-{
+FLASHMEM void FlexIO2VGA::clrbol(void) {
   int16_t tempX = cursor_x;
   int16_t tempY = cursor_y;
 
@@ -1945,14 +1995,13 @@ void FlexIO2VGA::clrbol(void)
   for(int16_t x = tempX; x > 0; x--) write(0x7f);
 
   textxy(tempX,tempY);
-  if(isActive) cursorOn();
+  if(isActive) tCursorOn();
 }
 
 //=========================================================
 // Support function for VT100: Clear to begining of Screen.
 //=========================================================
-void FlexIO2VGA::clrbos(void)
-{
+FLASHMEM void FlexIO2VGA::clrbos(void) {
   int16_t tempX = cursor_x;
   int16_t tempY = cursor_y;
   
@@ -1967,14 +2016,13 @@ void FlexIO2VGA::clrbos(void)
       write(0x20); 
 
   textxy(tempX,tempY);
-  if(isActive) cursorOn();
+  if(isActive) tCursorOn();
 }
 
 //========================================
 // Support function for VT100: Clear Line.
 //========================================
-void FlexIO2VGA::clrlin(void)
-{
+FLASHMEM void FlexIO2VGA::clrlin(void) {
   int16_t tempX = cursor_x;
   int16_t tempY = cursor_y;
   bool isActive = false;
@@ -1984,8 +2032,103 @@ void FlexIO2VGA::clrlin(void)
   for(int16_t x = 0; x < print_window_w; x++) write(0x20);
 
   textxy(tempX,tempY);
-  if(isActive) cursorOn();
+  if(isActive) tCursorOn();
 }
+
+//=========================================
+// Reverse forground and background colors.
+//=========================================
+FLASHMEM void FlexIO2VGA::reverseVid(bool onOff) {
+  getChar(tCursorX(),tCursorY(),tCursor.char_under_cursor);
+  if(onOff) {
+    SaveRVFGC = vga4bit.getTextFGC();
+    SaveRVBGC = vga4bit.getTextBGC();
+    vga4bit.textColor(SaveRVBGC, SaveRVFGC);
+  } else {
+    vga4bit.textColor(SaveRVFGC, SaveRVBGC);
+  }
+}
+
+//==========================================================================================
+//= The following Graphic Button functions are based on Adafruits Graphic button libraries =
+//==========================================================================================
+// Initialize a graphic button. 
+void FlexIO2VGA::initButton(struct Gbuttons *buttons, int16_t x, int16_t y, int16_t w, int16_t h,
+ uint8_t outline, uint8_t fill, uint8_t textcolor,
+ char *label, uint8_t textsize)
+{
+	buttons->x = x;
+	buttons->y = y;
+	buttons->w = w;
+	buttons->h = h;
+	buttons->outlinecolor = outline;
+	buttons->fillcolor = fill;
+	buttons->textcolor = textcolor;
+	buttons->textsize  = textsize;
+	strncpy(buttons->label, label, 9);
+	buttons->label[9] = 0;
+}
+
+// Draw graphic button. (not completely implemented yet)
+void FlexIO2VGA::drawButton(struct Gbuttons *buttons, boolean inverted) {
+  uint16_t fill, outline;
+//  uint16_t text;
+  uint16_t fgcolor = foreground_color;	
+  uint16_t bgcolor = background_color;	
+
+  if(!inverted) {
+    fill    = buttons->fillcolor;
+    outline = buttons->outlinecolor;
+//    text    = buttons->textcolor;
+  } else {
+    fill    = buttons->textcolor;
+    outline = buttons->outlinecolor;
+//    text    = buttons->fillcolor;
+  }
+  vga4bit.fillRect(buttons->x, buttons->y, buttons->w+buttons->x, buttons->h+buttons->y,fill);
+  vga4bit.drawRect(buttons->x, buttons->y, buttons->w+buttons->x, buttons->h+buttons->y,outline);
+
+//  drawCircleSquareFill(buttons->x, buttons->y, buttons->w+buttons->x, buttons->h+buttons->y,
+//					   min(buttons->w,buttons->h)/4, min(buttons->w,buttons->h)/4, fill);
+
+//  drawCircleSquare(buttons->x, buttons->y, buttons->w+buttons->x, buttons->h+buttons->y,
+//				   min(buttons->w,buttons->h)/4, min(buttons->w,buttons->h)/4, outline);
+
+//  _gfx->setCursor(_x - strlen(_label)*3*_textsize, _y-4*_textsize);
+//  _gfx->setTextColor(text);
+//  _gfx->setTextSize(_textsize);
+//  _gfx->print(_label);
+  textColor(fgcolor,bgcolor);	// restore colors	
+}
+
+// Check the button to see if it is within the range of selection.
+boolean FlexIO2VGA::buttonContains(struct Gbuttons *buttons, int16_t x, int16_t y) {
+  if ((x < buttons->x) || (x > (buttons->x + buttons->w))) return false;
+  if ((y < buttons->y) || (y > (buttons->y + buttons->h))) return false;
+  return true;
+}
+
+// Signal state of buttons: true = pressed, false = released
+void FlexIO2VGA::buttonPress(struct Gbuttons *buttons, boolean p) {
+  buttons->laststate = buttons->currstate;
+  buttons->currstate = p;
+}
+
+// Check the current state of a button: pressed/released
+boolean FlexIO2VGA::buttonIsPressed(struct Gbuttons *buttons) {
+	return buttons->currstate;
+}
+
+// Check if button was just pressed
+boolean FlexIO2VGA::buttonJustPressed(struct Gbuttons *buttons) {
+	return (buttons->currstate && !buttons->laststate);
+ }
+
+// Check if button was just released
+boolean FlexIO2VGA::buttonJustReleased(struct Gbuttons *buttons) {
+	return (!buttons->currstate && buttons->laststate);
+}
+//==========================================================================================
 
 extern FlexIO2VGA vga4bit;
 

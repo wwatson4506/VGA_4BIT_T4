@@ -168,6 +168,7 @@ typedef struct {
   uint8_t  y_start;         // Cursor y start (0-15).
   uint8_t  x_end;           // Cursor y end (0-7).
   uint8_t  y_end;           // Cursor y end (0-15).
+  uint8_t  color;           // Text cursor color.
 } text_cursor;
 
 // Graphic cursor struct.
@@ -181,6 +182,7 @@ typedef struct {
   uint8_t  x_end;           // Cursor y end (0-7).
   uint8_t  y_end;           // Cursor y end (0-15).
   uint8_t  type;            // Graphic type. 0=block, 1=arrow, 2=hollow arrow.
+  uint8_t  color;           // Graphic cursor color.
 } graphic_cursor;
 
 // Cursor types
@@ -188,6 +190,25 @@ typedef struct {
 #define FILLED_ARROW 1
 #define HOLLOW_ARROW 2
 #define I_BEAM       3
+
+typedef struct Gbuttons gbuttons_t;
+/* Struct for graphic buttons */
+/* Based on Adafruit graphic buttons */
+/* Not completly implemented at this time */
+struct Gbuttons {
+  boolean initialzed;
+  int16_t x;
+  int16_t y;
+  int16_t w;
+  int16_t h;
+  uint8_t outlinecolor;
+  int8_t fillcolor;
+  uint8_t textcolor;
+  uint16_t textsize;
+  boolean currstate;
+  boolean laststate;
+  char     label[10];
+};
 
 //***************************************************************
 // horizontal values must be divisible by 8 for correct operation
@@ -311,15 +332,16 @@ public:
   // Software text cursor methods
   void initCursor(uint8_t xStart, uint8_t yStart, uint8_t xEnd,
                   uint8_t yEnd, bool blink, uint32_t blink_rate);	
-  void cursorOn(void);
-  void cursorOff(void);
+  void tCursorOn(void);
+  void tCursorOff(void);
   uint16_t tCursorX(void);
   uint16_t tCursorY(void);
-  void drawCursor(int color);
+  void drawTcursor(int color);
   void updateTCursor(int column, int line);
   void setCursorBlink(bool onOff);
   void setCursorType(uint8_t cursorType);
-  
+  void setTcursorColor(uint8_t cursorColor);  
+
   // Software graphic cursor methods
   void initGcursor(uint8_t type, uint8_t xStart, uint8_t yStart,
                    uint8_t xEnd, uint8_t yEnd);
@@ -329,7 +351,10 @@ public:
   uint16_t gCursorY(void);
   void drawGcursor(int color);
   void moveGcursor(int16_t column, int16_t line);
-
+  void setGcursorColor(uint8_t cursorColor);  
+  // Set block cursor dimensions: type = 0 for text, 1 for graphic.
+  int8_t setBlkCursorDims(uint8_t xStart, uint8_t yStart, uint8_t xEnd,
+                          uint8_t yEnd,uint8_t type);
   // low level frame buffer methods
   uint8_t getByte(uint32_t x, uint32_t y);
   void getChar(int16_t x, int16_t y, uint8_t *buf);
@@ -377,6 +402,7 @@ public:
   int  getFontHeight(void) { return font_height; }
   void setForegroundColor(int8_t fg_color); // RGBI format
   void setBackgroundColor(int8_t bg_color); // RGBI format
+  void reverseVid(bool onOff);
   void textxy(int column, int line);
   int16_t getTextX(void) { return cursor_x; }
   int16_t getTextY(void) { return cursor_y; }
@@ -399,6 +425,17 @@ public:
   void slWrite(int16_t x,  uint16_t fgcolor, uint16_t bgcolor, const char * text);
 
   uint16_t promp_size = 0;
+
+  /* Button Functions */
+  void initButton(struct Gbuttons *button, int16_t x, int16_t y, int16_t w, int16_t h,
+		          uint8_t outline, uint8_t fill, uint8_t textcolor,
+		          char *label, uint8_t textsize);
+  void drawButton(struct Gbuttons *buttons, bool inverted);
+  bool buttonContains(struct Gbuttons *buttons,int16_t x, int16_t y);
+  void buttonPress(struct Gbuttons *buttons, bool p);
+  bool buttonIsPressed(struct Gbuttons *buttons);
+  bool buttonJustPressed(struct Gbuttons *buttons);
+  bool buttonJustReleased(struct Gbuttons *buttons);
   
 private:
   void set_clk(int num, int den);
@@ -420,6 +457,8 @@ private:
   // Private variables
   uint8_t foreground_color;
   uint8_t background_color;
+  uint8_t SaveRVFGC; 
+  uint8_t SaveRVBGC;
   bool transparent_background;
 
   short cursor_x;		// cursor x position in print window in CHARACTER
