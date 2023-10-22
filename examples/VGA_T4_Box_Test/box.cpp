@@ -83,7 +83,7 @@ void box_color(int16_t row1, int16_t col1, int16_t row2, int16_t col2) {
 void box_erase(int16_t row1, int16_t col1, int16_t row2, int16_t col2) {
   int16_t x, y;
   for(y = row1; y <= row2; y++) {
-    for(x = col1; x < col2; x++) {
+    for(x = col1; x <= col2; x++) {
       vga4bit.textxy(x,y);
       vga4bit.write(' ');
     }
