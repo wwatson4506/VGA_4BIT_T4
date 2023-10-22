@@ -734,11 +734,6 @@ FLASHMEM void FlexIO2VGA::drawRect(int x0, int y0, int x1, int y1, int color) {
 //=========================
 FLASHMEM void FlexIO2VGA::fillRect(int x0, int y0, int x1, int y1, int color) {
   int t;
-  bool wasActive = false;
-  if(gCursor.active) {
-    gCursorOff(); // Must turn of software driven graphic cursor if on !!
-    wasActive = true;
-  }
   x0 = clip_x(x0);
   y0 = clip_y(y0);
   x1 = clip_x(x1);
@@ -746,23 +741,18 @@ FLASHMEM void FlexIO2VGA::fillRect(int x0, int y0, int x1, int y1, int color) {
   // increase speed if the rectangle is a single pixel, horizontal or vertical line
   if( (x0 == x1) ) {
     if(y0 == y1) {
-if(wasActive) gCursorOn();
       return drawPixel(x0, y0, color);
     } else {
       if(y0 < y1) {
-if(wasActive) gCursorOn();
         return drawVLineFast(x0, y0, y1, color);
       } else {
-  if(wasActive) gCursorOn();
         return drawVLineFast(x0, y1, y0, color);
       }
     }
   } else if(y0 == y1) {
     if(x0 < x1) {
-if(wasActive) gCursorOn();
       return drawHLineFast(y0, x0, x1, color);
     } else {
-if(wasActive) gCursorOn();
       return drawHLineFast(y0, x1, x0, color);
     }
   }
@@ -780,7 +770,6 @@ if(wasActive) gCursorOn();
     drawHLineFast(y0, x0, x1, color);
     y0++;
   }
-  if(wasActive) gCursorOn();
 }
 
 //===========================================================
