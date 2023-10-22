@@ -12,8 +12,8 @@
 // Uncomment one of the following screen resolutions. Try them all:)
 //const vga_timing *timing = &t1024x768x60;
 //const vga_timing *timing = &t800x600x60;
-//const vga_timing *timing = &t640x480x60;
-const vga_timing *timing = &t640x400x70;
+const vga_timing *timing = &t640x480x60;
+//const vga_timing *timing = &t640x400x70;
 FlexIO2VGA vga4bit;
 
 // Wait for frame update complete. If set to false, updates are very

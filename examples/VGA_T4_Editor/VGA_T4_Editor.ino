@@ -67,7 +67,7 @@ void setup() {
   //  - blink rate of 30
   vga4bit.initCursor(0,0,7,15,true,30);
   // Turn cursor on
-  vga4bit.cursorOn();
+  vga4bit.tCursorOn();
   // Move cursor to home position
   vga4bit.textxy(0,0);
 
@@ -192,7 +192,7 @@ void loop() {
 #endif
   // Reset text cursor
   vga4bit.initCursor(0,0,7,15,true,30);
-  vga4bit.cursorOn();
+  vga4bit.tCursorOn();
   vga4bit.clearPrintWindow();
 }
 

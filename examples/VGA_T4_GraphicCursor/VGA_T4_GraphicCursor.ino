@@ -153,19 +153,12 @@ void setup() {
   vga4bit.initGcursor(FILLED_ARROW,0,0,vga4bit.getFontWidth()-1,vga4bit.getFontHeight()-1);
   // Turn graphic cursor on.
   vga4bit.gCursorOn();
-  // Inititalize text cursor.
-  // initCursor(Cursor x start, Cursor y start, Cursor x end, Cursor y end) 
-  // First four arguments define the block cursor dimensions.
-  // Block cursor dimensions are in pixels. Cannot exceed font dimensions minus 1.
-  vga4bit.initCursor(0,0,7,15,true,30); // Define blinking block text cursor.
-  // Turn text cursor on.
-  vga4bit.cursorOn();
+  vga4bit.textxy(0,2); // Set print position.
 }
 
 void loop() {
   myusb.Task();
   if(mouseEvent()) { // Wait for a mouse event.
-    vga4bit.textxy(0,2); // Set print position.
     vga4bit.printf("Mouse X: %4.4d\n", mouse_msg.scaledX);
     vga4bit.printf("Mouse Y: %4.4d\n", mouse_msg.scaledY);
     vga4bit.printf("Buttons: %d\n", getMouseButtons());
@@ -176,6 +169,7 @@ void loop() {
 	dcCount += getDblClick(); // Add to Double Click Count.
     vga4bit.printf("Single Clicks: %d\n", scCount);
     vga4bit.printf("Double Clicks: %d\n", dcCount);
+	vga4bit.textxy(0,2); // Set print position.
     // Set mouse cursor position.
     vga4bit.moveGcursor(mouse_msg.scaledX, mouse_msg.scaledY); 
   }

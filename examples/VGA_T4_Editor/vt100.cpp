@@ -80,7 +80,7 @@ int AttribUL, AttribRV, AttribInvis;
 int SaveX, SaveY, SaveUL, SaveRV, SaveInvis, SaveFontNbr;
 uint16_t SaveRVFGC, SaveRVBGC, SaveFGC, SaveBGC, DefaultFGC, DefaultBGC;
 
-static const uint16_t PROGMEM vtColors[] = {
+static const uint16_t vtColors[] = {
 	VGA_BLACK,          // black
 	VGA_BRIGHT_RED,     // red
 	VGA_BRIGHT_GREEN,   // green
@@ -227,12 +227,12 @@ void cmd_ClearBOS(void) {
 
 // turn the cursor off
 void cmd_CursorOff(void) {
-	vga4bit.cursorOff();
+	vga4bit.tCursorOff();
 }
 
 // turn the cursor on
 void cmd_CursorOn(void) {
-    vga4bit.cursorOn();
+    vga4bit.tCursorOn();
 }
 
 // save the current attributes

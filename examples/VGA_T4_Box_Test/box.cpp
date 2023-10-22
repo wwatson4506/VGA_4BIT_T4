@@ -45,11 +45,13 @@ void vbox_put(uint8_t *buf) {
 	
   // get the coordinates back
   workbuf = buf;
+  
   // Convert 8 bit pairs to 16 bit coords (Big Endian).
   row1 = (uint16_t)((workbuf[0] << 8) + (workbuf[1] & 0xff));
   col1 = (uint16_t)((workbuf[2] << 8) + (workbuf[3] & 0xff));
   row2 = (uint16_t)((workbuf[4] << 8) + (workbuf[5] & 0xff));
   col2 = (uint16_t)((workbuf[8] << 8) + (workbuf[7] & 0xff));
+
   workbuf+=8; // Skip over coords to data.
 
   // Write out each line of video
