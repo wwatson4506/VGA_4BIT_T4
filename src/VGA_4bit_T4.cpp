@@ -68,6 +68,7 @@ static uint32_t frameBufferIndex = 0;
 static int fb_width;
 static int fb_height;
 static size_t _pitch;  
+uint8_t currentFont[256*16] DMAMEM;
 text_cursor tCursor;
 graphic_cursor gCursor;
 
@@ -224,7 +225,10 @@ FLASHMEM void FlexIO2VGA::begin(const vga_timing& mode, bool half_height, bool h
   FLEXIO2_TIMCTL0 = FLEXIO_TIMCTL_TIMOD(3);
 
   // Initialize text and cursor settings to default.
-  init_text_settings();
+  if(!initialized) {
+	init_text_settings();
+	initialized = true;
+  }
 }
 
 //===================================================
@@ -369,6 +373,23 @@ void FlexIO2VGA::set_next_buffer(const void* source, size_t pitch, bool wait) {
     wait_for_frame();
 }
 
+//==============================================
+// Select and set screen mode.
+//==============================================
+FLASHMEM void FlexIO2VGA::setScreenMode(const vga_timing& mode, bool half_height,
+                                         bool half_width, unsigned int bpp) {
+  stop();
+  tCursorOff();
+  begin(mode,half_height, half_width, bpp);
+  print_window_x = 0;
+  print_window_y = 0;
+  print_window_w = fb_width / font_width;
+  print_window_h = fb_height / font_height;
+  clear(background_color);
+  textxy(0,0);
+  tCursorOn(); 
+}
+
 //-----------------------
 // Set double width mode.
 //-----------------------
@@ -402,12 +423,12 @@ uint16_t FlexIO2VGA::getGwidth(void) { return fb_width; }
 uint16_t FlexIO2VGA::getGheight(void) { return fb_height; }
 
 //------------------------
-// Get frame buffer width.
+// Get frame buffer text width.
 //------------------------
 FLASHMEM uint16_t  FlexIO2VGA::getTwidth(void) { return fb_width/font_width; }
 
 //-------------------------
-// Get frame buffer height.
+// Get frame buffer text height.
 //-------------------------
 FLASHMEM uint16_t  FlexIO2VGA::getTheight(void) { return fb_height/font_height; }
 
@@ -1377,7 +1398,8 @@ FLASHMEM void FlexIO2VGA::copy(int s_x, int s_y, int d_x, int d_y, int w, int h)
 // Unused...
 //================
 FLASHMEM void FlexIO2VGA::init() {
-
+  // Initialize text and cursor settings to default.
+  init_text_settings();
 }
 
 //================
@@ -1393,6 +1415,9 @@ FLASHMEM void FlexIO2VGA::init_text_settings() {
 
   font_width = 8;	// font width != 8 is not supported
   font_height = 16;
+
+  memcpy(currentFont,font_8x16,sizeof(font_8x16));
+
   promp_size = 0;  
   print_window_x = 0;
   print_window_y = 0;
@@ -1529,6 +1554,7 @@ FLASHMEM void FlexIO2VGA::setPromptSize(uint16_t ps) {
   promp_size = (ps * font_width);	
 }
 
+
 //===========================================
 // Set font size. Just selecting font height.
 // Valid sizes: 8 or 16 for now.
@@ -1537,8 +1563,27 @@ FLASHMEM int FlexIO2VGA::setFontSize(uint8_t fsize, bool runflag) {
   if((fsize != 8) && (fsize != 16)) return -1;
   font_height = fsize;	
   promp_size = 0;
+  print_window_h = fb_height / font_height;
+  setBlkCursorDims(tCursor.x_start,tCursor.y_start,tCursor.x_end,font_height,0);
   if(!runflag) clear(background_color);
   return (int)fsize;
+}
+
+//======================================================
+// Load a font from memory or file.
+// filename: font file.
+//      src: true = from font file, false = from memory.
+//======================================================
+FLASHMEM int FlexIO2VGA::fontLoad(const char *filename, bool src) {
+  if(src) {
+    
+  } else {
+//    memcpy(currentFont,font_8x16,sizeof(font_8x16));
+//    for(uint16_t i = 0; i < sizeof(font_8x16); i++) {
+//	  currentFont[i] = font_8x16[i];
+//	}
+  }	  
+  return (int)0;
 }
 
 //===========================================
@@ -1563,7 +1608,8 @@ FLASHMEM void FlexIO2VGA::drawText(int16_t x, int16_t y, const char * text, uint
     if(font_height == 8)
       charPointer = &font_8x8[t*font_height];
     else
-      charPointer = &font_8x16[t*font_height];
+//      charPointer = &font_8x16[t*font_height];
+      charPointer = &currentFont[t*font_height];
     for(j = 0; j < font_height; j++) {
       b = *charPointer++;
       for(i = 0; i < font_width; i++) {
@@ -1920,7 +1966,7 @@ FLASHMEM void FlexIO2VGA::slWrite(int16_t x,  uint16_t fgcolor,
   drawText(x*font_width,fb_height-font_height , text, fgcolor, bgcolor, VGA_DIR_RIGHT);
 }
 
-//==========+================================
+//===========================================
 // Clear the status line. The 800x600 mode
 // needs fb_height adjusted to 600 - 8 as
 // 600 / (font_height == 16) = 37.5 character

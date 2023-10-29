@@ -86,6 +86,9 @@ typedef enum vga_text_direction
   VGA_DIR_BOTTOM,
 } vga_text_direction;
 
+#define MEMSRC 0   // Font source from memory.
+#define FILESRC 1  // Font source from file.
+
 //**************************************************************//
 // Graphic Cursor Image Array
 //**************************************************************//
@@ -293,7 +296,7 @@ class FlexIO2VGA : public Print
 public:
 
   FlexIO2VGA() {};
-  
+
   void begin(const vga_timing& mode, bool half_height=false,
              bool half_width=false, unsigned int bpp=4);
   void stop(void);
@@ -309,6 +312,8 @@ public:
   }
 
   void init();  // Currently unused
+  void setScreenMode(const vga_timing& mode, bool half_height=false,
+                                         bool half_width=false, unsigned int bpp=4);
 
   // Frame buffer and init methods
   void fbUpdate(bool wait);
@@ -397,6 +402,7 @@ public:
   void scroll(int x, int y, int w, int h, int dx, int dy,int col);
   void drawText(int16_t x, int16_t y, const char * text, uint8_t fgcolor, uint8_t bgcolor);
   void drawText(int16_t x, int16_t y, const char * text, uint8_t fgcolor, uint8_t bgcolor, vga_text_direction dir);
+  int  fontLoad(const char *filename, bool src);
   int  setFontSize(uint8_t fsize, bool runflag);  
   int  getFontWidth(void) { return font_width; }
   int  getFontHeight(void) { return font_height; }
@@ -479,7 +485,7 @@ private:
   int32_t widthxbpp;
   int bpp;
 
-  uint32_t cursor = 0;
+  bool initialized = false;
   
   uint8_t *_fb = NULL;
   volatile unsigned int frameCount;
