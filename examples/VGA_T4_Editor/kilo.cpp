@@ -19,7 +19,7 @@
 
 /*** defines ***/
 
-#define KILO_VERSION "0.0.1"
+#define KILO_VERSION "0.0.2"
 #define KILO_TAB_STOP 2
 #define KILO_QUIT_TIMES 2
 
@@ -160,14 +160,14 @@ PROGMEM const char *C_HL_keywords[] = {
 PROGMEM const char *BAS_HL_extensions[] = { ".bas", ".lib", NULL };
 PROGMEM const char *BAS_HL_keywords[] = {
   "print", "input", "if", "while", "for", "then", "next", "return", "else",
-  "goto", "gosub", "list", "load", "save", "elseif", "wend", "cursor",
-  "gcursorxy", "gcursorset", "gbuttoninit", "drawgbutton", "chdrv", "beep",
-  "commput", "rtcset", "read", "data", "restore", "on",
-  "dim", "erase", "test", "edit", "help", "run", "new", "system", "pause",
-  "tron", "troff", "cls", "get", "put", "poke", "adcinit", "pinmode",
-  "pwm", "pwmfreq", "shiftout", "eewrite", "slcls", "slprint", "endif",
-  "pwminit", "end", "repeat", "until", "to", "arrayfill", "swap", "clr",
-  "let", "lset", "rset", "open", "close", "procedure", "local",
+  "goto", "gosub", "list", "load", "save", "elseif", "wend", "tcursor", "gcursor",
+  "gcursorxy", "gcursorset", "tcursor", "defcursor", "tcursorfgc", "gcursorfgc",
+  "tcblink", "gbuttoninit", "drawgbutton", "chdrv", "beep", "commput", "rtcset",
+  "read", "data", "restore", "on", "dim", "erase", "test", "edit", "help", "run",
+  "new", "system", "pause", "tron", "troff", "cls", "get", "put", "poke",
+  "adcinit", "pinmode", "pwm", "pwmfreq", "shiftout", "eewrite", "slcls",
+  "slprint", "endif", "pwminit", "end", "repeat", "until", "to", "arrayfill",
+  "swap", "clr", "let", "lset", "rset", "open", "close", "procedure", "local",
   "function", "exitif", "stop", "do", "loop","llist", "exit", "downto", "step",
   "color", "plot", "line", "draw", "circle", "ellipse", "dir", "cd", "kill",
   "seek", "md", "copy", "rename", "fontsize", "pinwrite",
@@ -855,7 +855,7 @@ void editorDrawRows(struct abuf *ab) {
       if (E.numrows == 0 && y == E.screenrows / 3) {
         char welcome[80];
         int welcomelen = snprintf(welcome, sizeof(welcome),
-          "Kilo editor -- version %s", KILO_VERSION);
+          "Kilo editor -- Teensy version %s", KILO_VERSION);
         if (welcomelen > E.screencols) welcomelen = E.screencols;
         int padding = (E.screencols - welcomelen) / 2;
         if (padding) {
