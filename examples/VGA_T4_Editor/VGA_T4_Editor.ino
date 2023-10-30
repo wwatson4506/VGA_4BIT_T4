@@ -6,7 +6,7 @@
 #include "kilo.h"
 
 // Uncomment to enable USB drive usage.
-#define USE_USB_DRIVE 1
+//#define USE_USB_DRIVE 1
 
 USBHost myusb;
 USBHub hub1(myusb);

@@ -693,6 +693,7 @@ int editorOpen(char *filename) {
     editorInsertRow(E.numrows, line, linelen);
   }
   free(line);
+  fp.close();
   E.dirty = 0;
   return 0;
 }
@@ -722,6 +723,7 @@ void editorSave(void) {
 		buf[E.row[j].size+1] = '\0';
         fp.write(buf,strlen(buf));
 	}	
+	fp.truncate(fp.position());
 	fp.close();
 	E.dirty = 0;
 	editorSetStatusMessage("%d bytes written to disk", len);
@@ -938,7 +940,7 @@ void editorDrawMessageBar(struct abuf *ab) {
   abAppend(ab, "\x1b[K", 3); //Clear to end of line
   int msglen = strlen(E.statusmsg);
   if (msglen > E.screencols) msglen = E.screencols;
-  if (msglen && time(NULL) - E.statusmsg_time < 5)
+  if (msglen && (millis() - E.statusmsg_time) < 5000)
     abAppend(ab, E.statusmsg, msglen);
 }
 
@@ -971,7 +973,7 @@ void editorSetStatusMessage(const char *fmt, ...) {
   va_start(ap, fmt);
   vsnprintf(E.statusmsg, sizeof(E.statusmsg), fmt, ap);
   va_end(ap);
-  E.statusmsg_time = time(NULL);
+  E.statusmsg_time = millis();
 }
 
 /*** input ***/
@@ -1173,7 +1175,6 @@ int kilo(FS *type, char *filename) {
 
   initEditor();
   editorSetStatusMessage("HELP: Ctrl-S = save | Ctrl-Q = quit | Ctrl-F = find | F1 = HELP");
-
   if((err = editorOpen(filename)) == -2) return err;
 
   while (!exitflag) {
@@ -1189,6 +1190,7 @@ int kilo(FS *type, char *filename) {
 	  editorDelRow(i);
   }
   free(E.row);
+  free(E.filename);
   free(msgBuffer);
   vga4bit.setCursorBlink(true); // enable binking cursor
   vga4bit.setCursorType(0);		 // use block cursor
