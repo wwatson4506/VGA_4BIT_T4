@@ -4,10 +4,10 @@
 
 ## https://forum.pjrc.com/threads/72710-VGA-output-via-FlexIO-(Teensy4)
 
-## Most of the graphic and text function were taken and adapted from uVGA found here:
+## Most of the graphic and text functions were taken and adapted from uVGA found here:
 
 ## https://github.com/qix67/uVGA
- 
+
 # This library is WIP and is far from complete or correct!! Playing and testing.
 
 Schematic for RGBI R2R VGA ladder can be found at the beggining of VGA_4bit_T4.cpp file.
