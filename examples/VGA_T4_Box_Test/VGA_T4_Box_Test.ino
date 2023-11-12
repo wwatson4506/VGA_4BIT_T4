@@ -70,6 +70,7 @@ void setup() {
 
   vga4bit.textxy(9, 11);
   vga4bit.printf("Press any key to continue...");
+
   waitforInput();
   vbox_put(buf1);
   free(buf1);

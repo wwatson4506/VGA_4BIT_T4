@@ -1,6 +1,8 @@
 // Graphics Drawing Test
 // Taken from uVga and modified for T4.1 4 bit VGA driver by jmarsh.
-
+// Polygon drawing taken from VGA_T4 by Jean-MarcHarvengt
+// at https://github.com/Jean-MarcHarvengt/VGA_t4 and modified
+// for VGA_4bit_T4.
 // *********************************************************
 // drawEllipse() and fillEllipse() are not working properly.
 // Try fillEllips(516, 419,59,61,VGA_BRIGHT_WHITE).
@@ -39,6 +41,22 @@ void setup() {
   vga4bit.wait_for_frame();
   // Clear graphic screen
   vga4bit.clear(VGA_BLACK);
+
+  // Polygon data
+  PolySet.Center.x = 40     ; PolySet.Center.y = 40 ; 
+  PolySet.Pts[0].x = 30     ; PolySet.Pts[0].y = 10 ;
+  PolySet.Pts[1].x = 40     ; PolySet.Pts[1].y = 20 ;
+  PolySet.Pts[2].x = 40     ; PolySet.Pts[2].y = 40 ;
+  PolySet.Pts[3].x = 60     ; PolySet.Pts[3].y = 40 ;
+  PolySet.Pts[4].x = 60     ; PolySet.Pts[4].y = 70 ;
+  PolySet.Pts[5].x = 50     ; PolySet.Pts[5].y = 70 ;
+  PolySet.Pts[6].x = 50     ; PolySet.Pts[6].y = 50 ;
+  PolySet.Pts[7].x = 20     ; PolySet.Pts[7].y = 50 ;
+  PolySet.Pts[8].x = 20     ; PolySet.Pts[8].y = 40 ;
+  PolySet.Pts[9].x = 10     ; PolySet.Pts[9].y = 40 ;
+  PolySet.Pts[10].x = 10    ; PolySet.Pts[10].y = 30 ;
+  PolySet.Pts[11].x = 20    ; PolySet.Pts[11].y = 30 ;
+  PolySet.Pts[12].x = 10000 ; // ****** last point.x >= 10000 ******
 }
 
 void loop() {
@@ -92,10 +110,32 @@ void loop() {
   vga4bit.clear(VGA_BLACK); // Clear graphic screen
   for(i = 0; i<=itr; i++) {
     vga4bit.fbUpdate(wait); //wait_for_frame();
+    x0=random(fb_width);
+    y0=random(fb_height);
+    x1=random(fb_width);
+    y1=random(fb_height);
+    r=random(50)+5;
+    vga4bit.drawRrect(x0,y0,x1,y1,r,random(16));
+  }
+
+  vga4bit.clear(VGA_BLACK); // Clear graphic screen
+  for(i = 0; i<=itr; i++) {
+    vga4bit.fbUpdate(wait); //wait_for_frame();
+    x0=random(fb_width);
+    y0=random(fb_height);
+    x1=random(fb_width);
+    y1=random(fb_height);
+    r=random(50)+5;
+    vga4bit.fillRrect(x0,y0,x1,y1,r,random(16));
+  }
+
+  vga4bit.clear(VGA_BLACK); // Clear graphic screen
+  for(i = 0; i<=itr; i++) {
+    vga4bit.fbUpdate(wait); //wait_for_frame();
     x0=random(fb_width-1);
     y0=random(fb_height-1);
-    x1=random((fb_width-1)/2);
-    y1=random((fb_height-1)/2);
+    x1=random(100)+20;
+    y1=random(100)+20;
     vga4bit.drawEllipse(x0,y0,x1,y1,random(16));
   }	
 
@@ -104,8 +144,8 @@ void loop() {
     vga4bit.fbUpdate(wait); //wait_for_frame();
     x0=random(fb_width-1);
     y0=random(fb_height-1);
-    x1=random((fb_width-1)/2);
-    y1=random((fb_height-1)/2);
+    x1=random(100)+20;
+    y1=random(100)+20;
     vga4bit.fillEllipse(x0, y0, x1, y1, random(16));
   }	
 
@@ -114,7 +154,7 @@ void loop() {
     vga4bit.fbUpdate(wait); //wait_for_frame();
     x0=random(fb_width);
     y0=random(fb_height);
-    r=random(100);
+    r=random(50);
     vga4bit.drawCircle(x0,y0,r,1,random(16));
   }	
 
@@ -123,7 +163,7 @@ void loop() {
     vga4bit.fbUpdate(wait); //wait_for_frame();
     x0=random(fb_width);
     y0=random(fb_height);
-    r=random(100);
+    r=random(50);
     vga4bit.fillCircle(x0,y0,r,random(16));
   }	
 
@@ -144,4 +184,55 @@ void loop() {
     r=random(5)-1;
     vga4bit.drawText(x0,y0,"VGA_4_BIT Library",random(16),random(16),dir[r]);
   }
+
+  delay(2000);
+
+  vga4bit.clear(VGA_BLACK); // Clear graphic screen
+  for (int i = 0;i<100;i++){
+    vga4bit.fbUpdate(wait);
+    vga4bit.drawpolygon(random(fb_width) , random(fb_height), random(1,15));
+  }
+  delay(2000);
+  vga4bit.clear(VGA_BLACK);
+  for (int i = 0;i<100;i++){
+    vga4bit.fbUpdate(wait);
+    vga4bit.drawfullpolygon(random(fb_width) , random(fb_height), random(1,15),random(1,15));
+  }
+  delay(2000);
+  vga4bit.clear(VGA_BLACK);
+  for (int i = 0;i<100;i++){
+    vga4bit.fbUpdate(wait);
+    vga4bit.drawrotatepolygon(random(fb_width) , random(fb_height) , random(360), random(1,15), random(1,15), 0);
+  }
+  delay(2000);
+  vga4bit.clear(VGA_BLACK);
+  for (int i = 0;i<100;i++){
+   vga4bit.fbUpdate(wait);
+   vga4bit.drawrotatepolygon(random(fb_width) , random(fb_height) , random(360), random(1,15), random(1,15), 1);
+  }
+  delay(2000);
+  vga4bit.clear(VGA_BLACK);
+  for (int i = 0;i<1000;i++){
+    vga4bit.drawrotatepolygon(200 , 240 , i % 360, random(1,15), random(1,15), 0);
+    vga4bit.drawrotatepolygon(400 , 240 , i % 360, random(1,15), random(1,15), 1);
+    vga4bit.fbUpdate(wait);
+    delay(13);
+    vga4bit.clear(VGA_BLACK);
+  }
+  delay(2000);
+  vga4bit.clear(VGA_BLACK); // Clear graphic screen
+  for (int i = 0;i<1000;i++){
+    vga4bit.fillQuad(random(fb_width) , random(fb_height) ,random(150)+10 , random(150)+10 ,random(360) , random(16));
+    vga4bit.fbUpdate(wait);
+  }
+  delay(4000);
+
+  vga4bit.clear(VGA_BLACK); // Clear graphic screen
+  for (int i = 0;i<100;i++){
+    vga4bit.drawQuad(random(fb_width) , random(fb_height) ,random(150)+10 , random(150)+10,random(360) , random(16));
+    vga4bit.fbUpdate(wait);
+  }
+  delay(4000);
+
+  vga4bit.clear(VGA_BLACK);
 }
