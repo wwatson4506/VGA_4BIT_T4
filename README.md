@@ -56,6 +56,7 @@ Examples:
 - VGA_T4_Mandelbrot -- A uVGA example adapted to VGA_4BIT_T4. Finally drawing text in four different directions.
 - VGA_T4_treeDee -- Another Sumotoy example showing a rotating 3D framed cube.
 - VGA_T4_Box_Test -- Demonstrates allocating memory for saving and recalling sections of video memory. 
+- VGA_T4_Windows_Test -- A very simple windowing system.
 
 All files are heavily commented.
 
