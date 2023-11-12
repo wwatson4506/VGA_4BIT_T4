@@ -51,6 +51,7 @@ int desktop(uint8_t bgColor, uint8_t frameType, uint8_t frameColor,uint8_t title
 //============================================================
 int openWindow(int winNum) {
   uint8_t centerText = getCenteredTextX((windows[winNum].x2-1)-(windows[winNum].x1+1),windows[winNum].winTitle);  
+  uint8_t tempBGC = 0;
 
   if(windows[winNum].handle >= 0) return -1; // Error: Window is active.
 
@@ -74,11 +75,14 @@ int openWindow(int winNum) {
   (windows[winNum].frameType == SINGLE_LINE) ? vga4bit.write(180) : vga4bit.write(185);
 
   if(windows[winNum].shadowEnable) {
+    tempBGC = vga4bit.getBGC();
+    vga4bit.setBackgroundColor(VGA_BLACK);
     vga4bit.setForegroundColor(windows[winNum].shadowColor);
     box_charfill(windows[winNum].y2+4,windows[winNum].x1+1,windows[winNum].y2+4,
               windows[winNum].x2+1, 176);
     box_charfill(windows[winNum].y1+1,windows[winNum].x2+2,windows[winNum].y2+4,
               windows[winNum].x2+2, 176);
+    vga4bit.setBackgroundColor(tempBGC);
   }
   
   vga4bit.setForegroundColor(windows[winNum].titleColor);
