@@ -72,6 +72,8 @@ uint8_t currentFont[256*16] DMAMEM;
 text_cursor tCursor;
 graphic_cursor gCursor;
 
+PolyDef_t PolySet;  // will contain a polygon data
+
 //===============================================
 // Start 4 bit VGA display.
 // Params:
@@ -784,6 +786,26 @@ inline void FlexIO2VGA::drawVLineFast(int x, int y1, int y2, int color) {
   }
 }
 
+//--------------------------------------------------------------
+// Draw a horizontal line
+// x1,y1   : starting point
+// lenght  : lenght in pixels
+// color   : 16bits color
+//--------------------------------------------------------------
+FLASHMEM void FlexIO2VGA::draw_h_line(int16_t x, int16_t y, int16_t lenght, uint8_t color){
+	drawLine(x , y , x + lenght , y , color, false);
+}
+
+//--------------------------------------------------------------
+// Draw a vertical line
+// x1,y1   : starting point
+// lenght  : lenght in pixels
+// color   : 16bits color
+//--------------------------------------------------------------
+FLASHMEM void FlexIO2VGA::draw_v_line(int16_t x, int16_t y, int16_t lenght, uint8_t color){
+	drawLine(x , y , x , y + lenght , color, false);
+}
+
 //==================
 // Draw a rectangle.
 //==================
@@ -841,6 +863,88 @@ FLASHMEM void FlexIO2VGA::fillRect(int x0, int y0, int x1, int y1, int color) {
     drawHLineFast(y0, x0, x1, color);
     y0++;
   }
+}
+
+//======================================================================
+//  Displays a Rectangle at a given Angle.
+//  centerx			: specifies the center of the Rectangle.
+//	centery
+//  w,h 	        : specifies the size of the Rectangle.
+//	angle			: specifies the angle for drawing the rectangle
+//  color	    	: specifies the Color to use for Fill the Rectangle.
+//======================================================================
+FLASHMEM void FlexIO2VGA::drawQuad(int16_t centerx, int16_t centery, int16_t w, int16_t h, int16_t angle, uint8_t color){
+	int16_t	px[4],py[4];
+	float	l;
+	float	raddeg = 3.14159 / 180;
+	float	w2 = w / 2.0;
+	float	h2 = h / 2.0;
+	float	vec = (w2*w2)+(h2*h2);
+	float	w2l;
+	float	pangle[4];
+
+	l = sqrtf(vec);
+	w2l = w2 / l;
+	pangle[0] = acosf(w2l) / raddeg;
+	pangle[1] = 180.0 - (acosf(w2l) / raddeg);
+	pangle[2] = 180.0 + (acosf(w2l) / raddeg);
+	pangle[3] = 360.0 - (acosf(w2l) / raddeg);
+	px[0] = (int16_t)(calcco[((int16_t)(pangle[0]) + angle) % 360] * l + centerx);
+	py[0] = (int16_t)(calcsi[((int16_t)(pangle[0]) + angle) % 360] * l + centery);
+	px[1] = (int16_t)(calcco[((int16_t)(pangle[1]) + angle) % 360] * l + centerx);
+	py[1] = (int16_t)(calcsi[((int16_t)(pangle[1]) + angle) % 360] * l + centery);
+	px[2] = (int16_t)(calcco[((int16_t)(pangle[2]) + angle) % 360] * l + centerx);
+	py[2] = (int16_t)(calcsi[((int16_t)(pangle[2]) + angle) % 360] * l + centery);
+	px[3] = (int16_t)(calcco[((int16_t)(pangle[3]) + angle) % 360] * l + centerx);
+	py[3] = (int16_t)(calcsi[((int16_t)(pangle[3]) + angle) % 360] * l + centery);
+	// here we draw the quad
+	drawLine(px[0],py[0],px[1],py[1],color, false);
+	drawLine(px[1],py[1],px[2],py[2],color, false);
+	drawLine(px[2],py[2],px[3],py[3],color, false);
+	drawLine(px[3],py[3],px[0],py[0],color, false);
+}
+  
+//======================================================================
+//  Displays a filled Rectangle at a given Angle.
+//  centerx			: specifies the center of the Rectangle.
+//	centery
+//  w,h 	        : specifies the size of the Rectangle.
+//	angle			: specifies the angle for drawing the rectangle
+//  fillcolor    	: specifies the Color to use for Fill the Rectangle.
+//======================================================================
+FLASHMEM void FlexIO2VGA::fillQuad(int16_t centerx, int16_t centery, int16_t w, int16_t h, int16_t angle, uint8_t fillcolor){
+	int16_t	px[4],py[4];
+	float	l;
+	float	raddeg = 3.14159 / 180;
+	float	w2 = w / 2.0;
+	float	h2 = h / 2.0;
+	float	vec = (w2*w2)+(h2*h2);
+	float	w2l;
+	float	pangle[4];
+
+	l = sqrtf(vec);
+	w2l = w2 / l;
+	pangle[0] = acosf(w2l) / raddeg;
+	pangle[1] = 180.0 - (acosf(w2l) / raddeg);
+	pangle[2] = 180.0 + (acosf(w2l) / raddeg);
+	pangle[3] = 360.0 - (acosf(w2l) / raddeg);
+	px[0] = (int16_t)(calcco[((int16_t)(pangle[0]) + angle) % 360] * l + centerx);
+	py[0] = (int16_t)(calcsi[((int16_t)(pangle[0]) + angle) % 360] * l + centery);
+	px[1] = (int16_t)(calcco[((int16_t)(pangle[1]) + angle) % 360] * l + centerx);
+	py[1] = (int16_t)(calcsi[((int16_t)(pangle[1]) + angle) % 360] * l + centery);
+	px[2] = (int16_t)(calcco[((int16_t)(pangle[2]) + angle) % 360] * l + centerx);
+	py[2] = (int16_t)(calcsi[((int16_t)(pangle[2]) + angle) % 360] * l + centery);
+	px[3] = (int16_t)(calcco[((int16_t)(pangle[3]) + angle) % 360] * l + centerx);
+	py[3] = (int16_t)(calcsi[((int16_t)(pangle[3]) + angle) % 360] * l + centery);
+	// We draw 2 filled triangle for made the quad
+	// To be uniform we have to use only the Fillcolor
+	fillTriangle(px[0],py[0],px[1],py[1],px[2],py[2],fillcolor);
+	fillTriangle(px[2],py[2],px[3],py[3],px[0],py[0],fillcolor);
+	// here we draw the BorderColor from the quad
+//	drawLine(px[0],py[0],px[1],py[1],bordercolor);
+//	drawLine(px[1],py[1],px[2],py[2],bordercolor);
+//	drawLine(px[2],py[2],px[3],py[3],bordercolor);
+//	drawLine(px[3],py[3],px[0],py[0],bordercolor);
 }
 
 //===========================================================
@@ -1164,134 +1268,211 @@ next4:
   if(wasActive) gCursorOn();
 }
 
-//==============================================================
-// Draw ellipse.
-// x0, y0 = center of the ellipse
-// x1, y1 = upper right edge of the bounding box of the ellipse
-// ************* Fails with certain params ********************
-//==============================================================
-FLASHMEM void FlexIO2VGA::drawEllipse(int _x0, int _y0, int _x1, int _y1, int color) {
-  //----------------------------------------
-  // Added the following:
-  //----------------------------------------
-  int tx, ty;
-  tx = _x1;
-  ty = _y1;
-  _x1 += _x0;
-  _y1 += _y0;
-  _x0 -= tx;
-  _y0 -= ty;
-  //----------------------------------------
-
-  int halfHeight = abs(_y0 - _y1) / 2;
-  int halfWidth = abs(_x0 - _x1) / 2;
-  int x0 = (_x0 < _x1 ? _x0 : _x1);
-  int y0 = (_y0 < _y1 ? _y0 : _y1) + 2 * halfHeight;
-  int x1 = x0 + halfWidth * 2;
-  int y1 = y0 - halfHeight * 2;
-  int a = abs(x1-x0);
-  int b = abs(y1-y0);
-  int b1 = b & 1; // values of diameter
-  long dx = 4 * (1 - a) * b * b;
-  long dy = 4 * (b1 + 1) * a * a; // error increment
-  long err = dx + dy + b1 * a * a;
-  long e2; // error of 1.step
-
-  bool wasActive = false;
-  if(gCursor.active) {
-    gCursorOff(); // Must turn of software driven graphic cursor if on !!
-    wasActive = true;
-  }
-  // if x1,y1 is not the correct edge, try... something
-  if(x0 > x1) {
-    x0 = x1;
-    x1 += a;
-  }
-  if(y0 > y1) {
-    y0 = y1;
-  }
-  y0 += (b + 1) / 2;
-  y1 = y0 - b1;	// starting pixel
-  a *= 8*a;
-  b1 = 8*b*b;
+//==================================================================
+// Draw arc.
+// xcenter, ycenter = center of arc.
+// xradius, yradius = major and minor radius.
+// startAngle, endAngle = (0 to 360) positive and negative integers.
+//==================================================================
+FLASHMEM void FlexIO2VGA::drawArc(int xcenter, int ycenter,
+                                  int xradius, int yradius,
+                                  int startAngle, int endAngle) {
+  float ang = (((startAngle<=endAngle) ? startAngle : endAngle) * (PI/180));
+  float range = (((endAngle>startAngle) ? endAngle : startAngle) * (PI/180));
+  float x = (xradius * cos(ang));
+  float y = (yradius * sin(ang));
   do {
-    drawPixel(x1, y0, color); //	I. Quadrant
-    drawPixel(x0, y0, color); //  II. Quadrant
-    drawPixel(x0, y1, color); // III. Quadrant
-    drawPixel(x1, y1, color); //  IV. Quadrant
-    e2 = 2*err;
-    if(e2 <= dy) {
-      y0++;
-      y1--;
-      dy += a;
-      err += dy;
-    }  // y step 
-    if((e2 >= dx) || (2*err > dy)) {
-      x0++;
-      x1--;
-      dx += b1;
-      err += dx;
-    } // x step
-  } while (x0 <= x1);
-	
-  while ((y0 - y1) < b) {  // too early stop of flat ellipses a=1
-    drawPixel(x0 - 1, y0, color); // -> finish tip of ellipse
-    drawPixel(x1 + 1, y0++, color); 
-    drawPixel(x0 - 1, y1, color);
-    drawPixel(x1 + 1, y1--, color); 
-  }
-  if(wasActive) gCursorOn();
+    vga4bit.drawPixel((int)(xcenter+x+0.5),(int)(ycenter-y+0.5),15);
+    ang += 0.001;
+    x = (xradius * cos(ang));
+    y = (yradius * sin(ang));
+  } while(ang <= range);
 }
 
-//==============================================================
-// Draw ellipse filled.
-// x0, y0 = center of the ellipse.
-// x1, y1 = upper right edge of the bounding box of the ellipse.
-// ************* Fails with certain params ********************
-// Example: vga4bit.fillEllipse(516,419,59,61,VGA_BRIGHT_WHITE);
-//          vga_timing = t640x480x60. FAILS...
-//==============================================================
-FLASHMEM void FlexIO2VGA::fillEllipse(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t color) {
-  int x;
-  int y;
+//==================================================================
+// Displays an Ellipse.
+// cx: specifies the X position
+// cy: specifies the Y position
+// radius1: minor radius of ellipse.
+// radius2: major radius of ellipse.
+// color: specifies the Color to use for draw the Border from the Ellipse.
+//==================================================================
+FLASHMEM void FlexIO2VGA::drawEllipse(int16_t cx, int16_t cy, int16_t radius1, int16_t radius2, uint8_t color){
+  int x = -radius1, y = 0, err = 2-2*radius1, e2;
+  float K = 0, rad1 = 0, rad2 = 0;
 
-  //----------------------------------------
-  // Added the following:
-  //----------------------------------------
-  int tx, ty;
-  tx = x1;
-  ty = y1;
-  x1 += x0;
-  y1 += y0;
-  x0 -= tx;
-  y0 -= ty;
-  //----------------------------------------
+  rad1 = radius1;
+  rad2 = radius2;
 
-  int half_height = abs(y0 - y1) / 2;
-  int half_width = abs(x0 - x1) / 2;
-  int center_x = (x0 < x1 ? x0 : x1) + half_width;
-  int center_y = (y0 < y1 ? y0 : y1) + half_height;
+  if (radius1 > radius2)
+  {
+    do {
+      K = (float)(rad1/rad2);
+      drawPixel(cx-x,cy+(uint16_t)(y/K),color);
+      drawPixel(cx+x,cy+(uint16_t)(y/K),color);
+      drawPixel(cx+x,cy-(uint16_t)(y/K),color);
+      drawPixel(cx-x,cy-(uint16_t)(y/K),color);
 
-//x*height*x*height+y*width*y*width <= width*height*width*height
-  bool wasActive = false;
-  if(gCursor.active) {
-    gCursorOff(); // Must turn of software driven graphic cursor if on !!
-    wasActive = true;
-  }
-
-  for(y = -half_height; y <= 0; y++) {
-    for(x = -half_width; x <= 0; x++) {
-      if( (x * x * half_height * half_height + y * y * half_width * half_width) <=
-          (half_height * half_height * half_width * half_width)) {
-        drawHLine(center_y + y, center_x + x, center_x - x, color);
-        if(y != 0) drawHLine(center_y - y, center_x + x, center_x - x, color);
-          break;
+      e2 = err;
+      if (e2 <= y) {
+        err += ++y*2+1;
+        if (-x == y && e2 <= x) e2 = 0;
       }
+      if (e2 > x) err += ++x*2+1;
     }
+    while (x <= 0);
   }
-  if(wasActive) gCursorOn();
+  else
+  {
+    y = -radius2;
+    x = 0;
+    do {
+      K = (float)(rad2/rad1);
+      drawPixel(cx-(uint16_t)(x/K),cy+y,color);
+      drawPixel(cx+(uint16_t)(x/K),cy+y,color);
+      drawPixel(cx+(uint16_t)(x/K),cy-y,color);
+      drawPixel(cx-(uint16_t)(x/K),cy-y,color);
+
+      e2 = err;
+      if (e2 <= x) {
+        err += ++x*2+1;
+        if (-y == x && e2 <= y) e2 = 0;
+      }
+      if (e2 > y) err += ++y*2+1;
+    }
+    while (y <= 0);
+  }
 }
 
+//==================================================================
+// Draw a filled ellipse.
+// cx: specifies the X position
+// cy: specifies the Y position
+// radius1: minor radius of ellipse.
+// radius2: major radius of ellipse.
+// fillcolor  : specifies the Color to use for Fill the Ellipse.
+//==================================================================
+FLASHMEM void FlexIO2VGA::fillEllipse(int16_t cx, int16_t cy, int16_t radius1, int16_t radius2, uint8_t fillcolor){
+  int x = -radius1, y = 0, err = 2-2*radius1, e2;
+  float K = 0, rad1 = 0, rad2 = 0;
+
+  rad1 = radius1;
+  rad2 = radius2;
+
+  if (radius1 > radius2)
+  {
+    do {
+      K = (float)(rad1/rad2);
+      draw_v_line((cx+x), (cy-(uint16_t)(y/K)), (2*(uint16_t)(y/K) + 1) , fillcolor);
+      draw_v_line((cx-x), (cy-(uint16_t)(y/K)), (2*(uint16_t)(y/K) + 1) , fillcolor);
+
+      e2 = err;
+      if (e2 <= y)
+      {
+        err += ++y*2+1;
+        if (-x == y && e2 <= x) e2 = 0;
+      }
+      if (e2 > x) err += ++x*2+1;
+
+    }
+    while (x <= 0);
+  }
+  else
+  {
+    y = -radius2;
+    x = 0;
+    do {
+      K = (float)(rad2/rad1);
+      draw_h_line((cx-(uint16_t)(x/K)), (cy+y), (2*(uint16_t)(x/K) + 1) , fillcolor);
+      draw_h_line((cx-(uint16_t)(x/K)), (cy-y), (2*(uint16_t)(x/K) + 1) , fillcolor);
+
+      e2 = err;
+      if (e2 <= x)
+      {
+        err += ++x*2+1;
+        if (-y == x && e2 <= y) e2 = 0;
+      }
+      if (e2 > y) err += ++y*2+1;
+    }
+    while (y <= 0);
+  }
+}
+
+FLASHMEM void FlexIO2VGA::drawRrect(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t r, uint8_t color) {
+  int16_t x = 0, y = 0;
+  int16_t dx = 0, dy = 0;
+  int16_t error = 0;
+  
+  if(x1 > x2) { x = x1; x1 = x2; x2 = x; }
+  if(y1 > y2) { y = y1; y1 = y2; y2 = y; }
+  r = min((r | 0), min((x2-x1)/2, (y2-y1)/2));
+
+  uint16_t cx1 = x1 + r;
+  uint16_t cx2 = x2 - r;
+  uint16_t cy1 = y1 + r;
+  uint16_t cy2 = y2 - r;
+
+
+  vga4bit.drawLine(cx1, y1+1, cx2, y1+1, color, false);  //Top horz line.
+  vga4bit.drawLine(cx1, y2-1, cx2, y2-1, color, false);  //Bottom horz line.
+  vga4bit.drawLine(x1+1, cy1, x1+1, cy2, color, false);  //Left vert line. 
+  vga4bit.drawLine(x2-1, cy1, x2-1, cy2, color, false);  //Right vert line.
+  
+  x = r;
+  while(y <= x) {
+    dy = 1 +2 * y;
+    y++;
+    error -= dy;
+    if(error < 0) {
+      dx = 1 - 2 * x;
+      x--;
+      error -= dx;
+    }
+    vga4bit.drawPixel(cx1 - x, cy1 - y, color);
+    vga4bit.drawPixel(cx1 - y, cy1 - x, color);
+    vga4bit.drawPixel(cx2 + x, cy1 - y, color);
+    vga4bit.drawPixel(cx2 + y, cy1 - x, color);
+    vga4bit.drawPixel(cx2 + x, cy2 + y, color);
+    vga4bit.drawPixel(cx2 + y, cy2 + x, color);
+    vga4bit.drawPixel(cx1 - x, cy2 + y, color);
+    vga4bit.drawPixel(cx1 - y, cy2 + x, color);
+  }
+}
+
+FLASHMEM void FlexIO2VGA::fillRrect(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t r, uint8_t color) {
+  int16_t x = 0, y = 0;
+  int16_t dx = 0, dy = 0;
+  int16_t error = 0;
+  
+  if(x1 > x2) { x = x1; x1 = x2; x2 = x; }
+  if(y1 > y2) { y = y1; y1 = y2; y2 = y; }
+  r = min((r | 0), min((x2-x1)/2, (y2-y1)/2));
+
+  uint16_t cx1 = x1 + r;
+  uint16_t cx2 = x2 - r;
+  uint16_t cy1 = y1 + r;
+  uint16_t cy2 = y2 - r;
+
+//  vga4bit.fbUpdate(true);
+  vga4bit.fillRect(x1,cy1,x2,cy2,color);
+
+//  vga4bit.fbUpdate(true);
+  x = r;
+  while(y <= x) {
+    dy = 1 +2 * y;
+    y++;
+    error -= dy;
+    if(error < 0) {
+      dx = 1 - 2 * x;
+      x--;
+      error -= dx;
+    }
+    vga4bit.drawLine(cx1-x, cy1-y, cx2+x, cy1-y, color, false);
+    vga4bit.drawLine(cx1-y, cy1-x, cx2+y, cy1-x, color, false);
+    vga4bit.drawLine(cx1-x, cy2+y, cx2+x, cy2+y, color, false);
+    vga4bit.drawLine(cx1-y, cy2+x, cx2+y, cy2+x, color, false);
+  }
+}
 
 // ------------------------------------------------------
 // copy area s_x,s_y of w*h pixels to destination d_x,d_y
@@ -1650,6 +1831,31 @@ FLASHMEM void FlexIO2VGA::drawText(int16_t x, int16_t y, const char * text, uint
   }
 }
 
+//==========================================
+// Define text printing window.
+// x, y, width and height are in characters.
+//==========================================
+FLASHMEM void FlexIO2VGA::setPrintCWindow(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
+  if(x < 0) {
+    print_window_x = 0;
+  } else if(x >= ((fb_width / font_width) - font_width)) {
+    print_window_x = (fb_width / font_width);
+  } else {
+    print_window_x = (x * font_width);
+  }
+  
+  if(y < 0) {
+    print_window_y = 0;
+  } else if(y >= ((fb_height / font_height) - font_height)) {
+    print_window_y = (fb_height / font_height);
+  } else {
+    print_window_y = (y *font_height);
+  }
+
+  print_window_w = width;// / (double_width ? 2:1);
+  print_window_h = height;// / (double_height ? 2:1);
+}
+
 //=========================================
 // Define text printing window.
 // x, y, width and height are in pixels.
@@ -1698,17 +1904,33 @@ FLASHMEM void FlexIO2VGA::unsetPrintWindow() {
 
 //=========================================
 // Scroll up text one line. (Slow!)
+// Set font_height to "-font_height" (negative)
+// to scroll up one line.
 //=========================================
-FLASHMEM void FlexIO2VGA::scrollPrintWindow() {
+FLASHMEM void FlexIO2VGA::scrollUpPrintWindow() {
   // move the 2nd line and the following ones one line up
   Vscroll(print_window_x, print_window_y + font_height, 
           print_window_w * font_width, (print_window_h - 1) *
-          font_height, -font_height, background_color);
+         font_height, -font_height, background_color);
 }
 
 //=========================================
 // Scroll up text one line. (Slow!)
+// Set font_height to "font_height" (positive)
+// to scroll down one line.
 //=========================================
+FLASHMEM void FlexIO2VGA::scrollDownPrintWindow() {
+  // move the 2nd line and the following ones one line up
+  Vscroll(print_window_x, print_window_y + font_height, 
+          print_window_w * font_width, (print_window_h - 1) *
+          font_height, font_height, background_color);
+}
+
+//=============================================
+// Scroll up text one line. (Slow!)
+// Set font_height to "-font_height" (negative)
+// to scroll up one line.
+//=============================================
 FLASHMEM void FlexIO2VGA::scrollUp() {
   // move the 2nd line and the following ones one line up
   Vscroll(print_window_x, print_window_y + font_height, 
@@ -1716,9 +1938,11 @@ FLASHMEM void FlexIO2VGA::scrollUp() {
           font_height, -font_height, background_color);
 }
 
-//=========================================
+//============================================
 // Scroll down text one line. (Slow!)
-//=========================================
+// Set font_height to "font_height" (positive)
+// to scroll down one line.
+//============================================
 FLASHMEM void FlexIO2VGA::scrollDown() {
   // move the 2nd line and the following ones one line up
   Vscroll(print_window_x, print_window_y + font_height, 
@@ -1907,7 +2131,7 @@ FLASHMEM size_t FlexIO2VGA::write(uint8_t c) {
       cursor_x = 0;
       cursor_y ++;
       if(cursor_y >= print_window_h) {
-        scrollPrintWindow(); // Scroll up one line.
+        scrollUpPrintWindow(); // Scroll up one line.
         cursor_y = print_window_h - 1;
       }
       break;
@@ -2095,11 +2319,169 @@ FLASHMEM void FlexIO2VGA::reverseVid(bool onOff) {
   }
 }
 
+//--------------------------------------------------------------
+//  Displays a Polygon.
+//  centerx			: are specified with PolySet.Center.x and y.
+//	centery
+//  cx              : Translate the polygon in x direction
+//  cy              : Translate the polygon in y direction
+//  bordercolor  	: specifies the Color to use for draw the Border from the polygon.
+//  polygon points  : are specified with PolySet.Pts[n].x and y 
+//  After the last polygon point , set PolySet.Pts[n + 1].x to 10000
+//  Max number of point for the polygon is set by MaxPolyPoint previously defined.
+//--------------------------------------------------------------
+FLASHMEM void FlexIO2VGA::drawpolygon(int16_t cx, int16_t cy, uint8_t bordercolor){
+	uint8_t n = 1;
+	while((PolySet.Pts[n].x < 10000) && (n < MaxPolyPoint)){
+		drawLine(PolySet.Pts[n].x + cx, 
+	             PolySet.Pts[n].y + cy, 
+				 PolySet.Pts[n - 1].x + cx , 
+				 PolySet.Pts[n - 1].y + cy, 
+				 bordercolor, false);
+		n++;		
+	}
+	// close the polygon
+	drawLine(PolySet.Pts[0].x + cx, 
+	         PolySet.Pts[0].y + cy, 
+			 PolySet.Pts[n - 1].x + cx, 
+			 PolySet.Pts[n - 1].y + cy, 
+			 bordercolor, false);
+}
+
+//--------------------------------------------------------------
+//  Displays a filled Polygon.
+//  centerx			: are specified with PolySet.Center.x and y.
+//	centery
+//  cx              : Translate the polygon in x direction
+//  cy              : Translate the polygon in y direction
+//  fillcolor  	    : specifies the Color to use for filling the polygon.
+//  bordercolor  	: specifies the Color to use for draw the Border from the polygon.
+//  polygon points  : are specified with PolySet.Pts[n].x and y 
+//  After the last polygon point , set PolySet.Pts[n + 1].x to 10000
+//  Max number of point for the polygon is set by MaxPolyPoint previously defined.
+//--------------------------------------------------------------
+FLASHMEM void FlexIO2VGA::drawfullpolygon(int16_t cx, int16_t cy, uint8_t fillcolor, uint8_t bordercolor){
+	int n,i,j,k,dy,dx;
+	int y,temp;
+	int a[MaxPolyPoint][2],xi[MaxPolyPoint];
+	float slope[MaxPolyPoint];
+
+    n = 0;
+
+	while((PolySet.Pts[n].x < 10000) && (n < MaxPolyPoint)){
+		a[n][0] = PolySet.Pts[n].x;
+		a[n][1] = PolySet.Pts[n].y;
+		n++;
+	}
+
+	a[n][0]=PolySet.Pts[0].x;
+	a[n][1]=PolySet.Pts[0].y;
+
+	for(i=0;i<n;i++)
+	{
+		dy=a[i+1][1]-a[i][1];
+		dx=a[i+1][0]-a[i][0];
+
+		if(dy==0) slope[i]=1.0;
+		if(dx==0) slope[i]=0.0;
+
+		if((dy!=0)&&(dx!=0)) /*- calculate inverse slope -*/
+		{
+			slope[i]=(float) dx/dy;
+		}
+	}
+
+	for(y=0;y< 480;y++)
+	{
+		k=0;
+		for(i=0;i<n;i++)
+		{
+
+			if( ((a[i][1]<=y)&&(a[i+1][1]>y))||
+					((a[i][1]>y)&&(a[i+1][1]<=y)))
+			{
+				xi[k]=(int)(a[i][0]+slope[i]*(y-a[i][1]));
+				k++;
+			}
+		}
+
+		for(j=0;j<k-1;j++) /*- Arrange x-intersections in order -*/
+			for(i=0;i<k-1;i++)
+			{
+				if(xi[i]>xi[i+1])
+				{
+					temp=xi[i];
+					xi[i]=xi[i+1];
+					xi[i+1]=temp;
+				}
+			}
+
+		for(i=0;i<k;i+=2)
+		{
+			drawLine(xi[i] + cx,y + cy,xi[i+1]+1 + cx,y + cy, fillcolor, false);
+		}
+
+	}
+
+	// Draw the polygon outline
+	drawpolygon(cx , cy , bordercolor);
+}
+
+//--------------------------------------------------------------
+//  Displays a rotated Polygon.
+//  centerx			: are specified with PolySet.Center.x and y.
+//	centery
+//  cx              : Translate the polygon in x direction
+//  ct              : Translate the polygon in y direction
+//  bordercolor  	: specifies the Color to use for draw the Border from the polygon.
+//  polygon points  : are specified with PolySet.Pts[n].x and y 
+//  After the last polygon point , set PolySet.Pts[n + 1].x to 10000
+//  Max number of point for the polygon is set by MaxPolyPoint previously defined.
+//--------------------------------------------------------------
+FLASHMEM void FlexIO2VGA::drawrotatepolygon(int16_t cx, int16_t cy, int16_t Angle, uint8_t fillcolor, uint8_t bordercolor, uint8_t filled)
+{
+	Point2D 	SavePts[MaxPolyPoint];
+	uint16_t	n = 0;
+	int16_t		ctx,cty;
+	float		raddeg = 3.14159 / 180;
+	float		angletmp;
+	float		tosquare;
+	float		ptsdist;
+
+	ctx = PolySet.Center.x;
+	cty = PolySet.Center.y;
+	
+	while((PolySet.Pts[n].x < 10000) && (n < MaxPolyPoint)){
+		// Save Original points coordinates
+		SavePts[n] = PolySet.Pts[n];
+		// Rotate and save all points
+		tosquare = ((PolySet.Pts[n].x - ctx) * (PolySet.Pts[n].x - ctx)) + ((PolySet.Pts[n].y - cty) * (PolySet.Pts[n].y - cty));
+		ptsdist  = sqrtf(tosquare);
+		angletmp = atan2f(PolySet.Pts[n].y - cty,PolySet.Pts[n].x - ctx) / raddeg;
+		PolySet.Pts[n].x = (int16_t)((cosf((angletmp + Angle) * raddeg) * ptsdist) + ctx);
+		PolySet.Pts[n].y = (int16_t)((sinf((angletmp + Angle) * raddeg) * ptsdist) + cty);
+		n++;
+	}	
+	
+	if(filled != 0)
+	  drawfullpolygon(cx , cy , fillcolor , bordercolor);
+    else
+	  drawpolygon(cx , cy , bordercolor);
+
+	// Get the original points back;
+	n=0;
+	while((PolySet.Pts[n].x < 10000) && (n < MaxPolyPoint)){
+		PolySet.Pts[n] = SavePts[n];
+		n++;
+	}	
+}
+
 //==========================================================================================
 //= The following Graphic Button functions are based on Adafruits Graphic button libraries =
+//= and adapted for use with Teensy and VGA_4bit_T4 library.                               =
 //==========================================================================================
 // Initialize a graphic button. 
-void FlexIO2VGA::initButton(struct Gbuttons *buttons, int16_t x, int16_t y, int16_t w, int16_t h,
+FLASHMEM void FlexIO2VGA::initButton(struct Gbuttons *buttons, int16_t x, int16_t y, int16_t w, int16_t h,
  uint8_t outline, uint8_t fill, uint8_t textcolor,
  char *label, uint8_t textsize)
 {
@@ -2116,7 +2498,7 @@ void FlexIO2VGA::initButton(struct Gbuttons *buttons, int16_t x, int16_t y, int1
 }
 
 // Draw graphic button. (not completely implemented yet)
-void FlexIO2VGA::drawButton(struct Gbuttons *buttons, boolean inverted) {
+FLASHMEM void FlexIO2VGA::drawButton(struct Gbuttons *buttons, boolean inverted) {
   uint16_t fill, outline;
 //  uint16_t text;
   uint16_t fgcolor = foreground_color;	
@@ -2131,47 +2513,41 @@ void FlexIO2VGA::drawButton(struct Gbuttons *buttons, boolean inverted) {
     outline = buttons->outlinecolor;
 //    text    = buttons->fillcolor;
   }
-  vga4bit.fillRect(buttons->x, buttons->y, buttons->w+buttons->x, buttons->h+buttons->y,fill);
-  vga4bit.drawRect(buttons->x, buttons->y, buttons->w+buttons->x, buttons->h+buttons->y,outline);
+  vga4bit.fillRrect(buttons->x, buttons->y, buttons->w+buttons->x, buttons->h+buttons->y,min(buttons->w,buttons->h), fill);
+  vga4bit.drawRrect(buttons->x-1, buttons->y-1, (buttons->w+1)+buttons->x, (buttons->h+1)+buttons->y,min(buttons->w,buttons->h), outline);
 
-//  drawCircleSquareFill(buttons->x, buttons->y, buttons->w+buttons->x, buttons->h+buttons->y,
-//					   min(buttons->w,buttons->h)/4, min(buttons->w,buttons->h)/4, fill);
-
-//  drawCircleSquare(buttons->x, buttons->y, buttons->w+buttons->x, buttons->h+buttons->y,
-//				   min(buttons->w,buttons->h)/4, min(buttons->w,buttons->h)/4, outline);
-
-//  _gfx->setCursor(_x - strlen(_label)*3*_textsize, _y-4*_textsize);
-//  _gfx->setTextColor(text);
-//  _gfx->setTextSize(_textsize);
-//  _gfx->print(_label);
+//  ->setCursor(_x - strlen(_label)*3*_textsize, _y-4*_textsize);
+//  ->setTextColor(text);
+//  ->setTextSize(_textsize);
+//  ->print(_label);
   textColor(fgcolor,bgcolor);	// restore colors	
 }
 
 // Check the button to see if it is within the range of selection.
-boolean FlexIO2VGA::buttonContains(struct Gbuttons *buttons, int16_t x, int16_t y) {
+FLASHMEM bool FlexIO2VGA::buttonContains(struct Gbuttons *buttons, int16_t x, int16_t y) {
   if ((x < buttons->x) || (x > (buttons->x + buttons->w))) return false;
   if ((y < buttons->y) || (y > (buttons->y + buttons->h))) return false;
   return true;
 }
 
 // Signal state of buttons: true = pressed, false = released
-void FlexIO2VGA::buttonPress(struct Gbuttons *buttons, boolean p) {
+FLASHMEM void FlexIO2VGA::buttonPress(struct Gbuttons *buttons, boolean p) {
   buttons->laststate = buttons->currstate;
   buttons->currstate = p;
 }
 
 // Check the current state of a button: pressed/released
-boolean FlexIO2VGA::buttonIsPressed(struct Gbuttons *buttons) {
+FLASHMEM bool FlexIO2VGA::buttonIsPressed(struct Gbuttons *buttons) {
 	return buttons->currstate;
 }
 
 // Check if button was just pressed
-boolean FlexIO2VGA::buttonJustPressed(struct Gbuttons *buttons) {
+FLASHMEM bool FlexIO2VGA::buttonJustPressed(struct Gbuttons *buttons) {
 	return (buttons->currstate && !buttons->laststate);
  }
 
 // Check if button was just released
-boolean FlexIO2VGA::buttonJustReleased(struct Gbuttons *buttons) {
+FLASHMEM bool FlexIO2VGA::buttonJustReleased(struct Gbuttons *buttons) {
 	return (!buttons->currstate && buttons->laststate);
 }
 //==========================================================================================
