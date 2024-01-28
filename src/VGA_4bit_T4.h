@@ -404,8 +404,9 @@ public:
   void set_next_buffer(const void* source, size_t pitch, bool wait);
 
   void wait_for_frame(void) {
-    unsigned int count = frameCount;
-    while (count == frameCount) yield();
+  asm("wfi"); // Added 01-28-24
+//    unsigned int count = frameCount;
+//    while (count == frameCount) yield();
   }
 
   void init();  // Currently unused
