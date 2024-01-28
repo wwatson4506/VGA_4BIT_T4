@@ -7,7 +7,7 @@ uint8_t winChars[] = {32,32,186,186,200,205,188};
 vgawin_t windows[MAXWINDOWS+2];
 
 //============================================================
-// Returns starting x position of string.
+// Returns starting x position of centered string.
 //============================================================
 uint8_t getCenteredTextX(uint8_t xwidth, const char * str) {
 	return (xwidth / 2) - (strlen(str) / 2);
