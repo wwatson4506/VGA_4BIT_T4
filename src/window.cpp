@@ -47,12 +47,36 @@ int desktop(uint8_t bgColor, uint8_t frameType, uint8_t frameColor,uint8_t title
 }
 
 //============================================================
+// Change title in title bar of selected window.
+//============================================================
+int titleWindow(int winNum, uint8_t titleColor, const char *title) {
+  uint8_t centerText = getCenteredTextX((windows[winNum].x2-1)-(windows[winNum].x1+1),title);  
+  uint8_t tmpColor = vga4bit.getFGC(); // Save foreground color.
+  int16_t tmpx = vga4bit.getTextX(); //Save print position.
+  int16_t tmpy = vga4bit.getTextY();
+  
+  if(windows[winNum].handle > 0) return -1; // Error: Window is active.
+  windows[winNum].winTitle = title;	// Update window struct title.
+  windows[winNum].titleColor = titleColor; // Update window struct color.
+  vga4bit.setForegroundColor(titleColor); // Set title color.
+  vga4bit.unsetPrintWindow(); // Temporarily release window boundries.
+  // Erase old title and print new title.
+  box_erase(windows[winNum].y1+1, windows[winNum].x1+1, windows[winNum].y1+1, windows[winNum].x2);
+  vga4bit.textxy((windows[winNum].x1+1)+centerText,windows[winNum].y1+1);
+  vga4bit.printf("%s",windows[winNum].winTitle);
+  vga4bit.textxy(tmpx,tmpy); // Restore print position.
+  vga4bit.setForegroundColor(tmpColor); // Restore foreground color.
+  selectWindow(winNum); // Restore original window boundries.
+  return 0;
+}
+
+//============================================================
 // Draw window given x1, y1, x2, y2 rectangle in current page.
 //============================================================
 int openWindow(int winNum) {
   uint8_t centerText = getCenteredTextX((windows[winNum].x2-1)-(windows[winNum].x1+1),windows[winNum].winTitle);  
   uint8_t tempBGC = 0;
-
+  
   if(windows[winNum].handle >= 0) return -1; // Error: Window is active.
 
   windows[winNum].handle = winNum;
@@ -89,8 +113,8 @@ int openWindow(int winNum) {
   vga4bit.textxy((windows[winNum].x1+1)+centerText,windows[winNum].y1+1);
   vga4bit.printf("%s",windows[winNum].winTitle);
 
-  vga4bit.setForegroundColor(windows[winNum].fgcSave);
-  vga4bit.setBackgroundColor(windows[winNum].bgcSave);
+  vga4bit.setForegroundColor(windows[winNum].fgc);
+  vga4bit.setBackgroundColor(windows[winNum].bgc);
 
   windows[winNum].isOpen = true;
 
@@ -115,11 +139,9 @@ int getActiveWin(void) {
 }
 
 //================================================================
-// Select an open window. Return -1 if not open or active windows.
+// Select an open window. Return -1 if not open or active window.
 //================================================================
 int selectWindow(int winNum) {
-  windows[winNum].fgcSave = vga4bit.getFGC();
-  windows[winNum].bgcSave = vga4bit.getBGC();
   vga4bit.setForegroundColor(windows[winNum].fgc);
   vga4bit.setBackgroundColor(windows[winNum].bgc);
 
@@ -145,8 +167,6 @@ int windowClose(int winNum) {
   windows[winNum].isOpen = false;
   free(windows[winNum].winbuf);
   vga4bit.unsetPrintWindow();
-  vga4bit.setForegroundColor(windows[winNum].fgcSave);
-  vga4bit.setBackgroundColor(windows[winNum].bgcSave);
   return 0;
 }
 
@@ -157,6 +177,7 @@ int clearWindow(int winNum) {
   int actv = getActiveWin();
   selectWindow(winNum);
   box_erase(0, 0, windows[winNum].y2, windows[winNum].x2);
+  vga4bit.textxy(0,0); // Home cursor.
   selectWindow(actv);
   return 0;
 }

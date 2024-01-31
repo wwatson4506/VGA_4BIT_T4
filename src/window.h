@@ -34,6 +34,7 @@ typedef struct {
 
 uint8_t getCenteredTextX(uint8_t xwidth, const char * str);
 int desktop(uint8_t bgColor, uint8_t frameType, uint8_t frameColor,uint8_t titleColor, const char *deskTitle);
+int titleWindow(int winNum, uint8_t titleColor, const char *title);
 int openWindow(int winNum);
 vgawin_t *getWinPointer(void);
 int getActiveWin(void);
