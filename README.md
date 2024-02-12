@@ -10,7 +10,9 @@
 
 # This library is WIP and is far from complete or correct!! Playing and testing.
 
-Schematic for RGBI R2R VGA ladder can be found at the beggining of VGA_4bit_T4.cpp file.
+## Update: Added KiCad fabrication files for a T4.1 VGA adaptor board. They can be found in the Extras folder.
+   
+Schematic for RGBI R2R VGA ladder can be found at the begining of VGA_4bit_T4.cpp file.
 
 This is a 4 bit per pixel VGA driver using FlexIO2VGA. 
 There are three main files:
