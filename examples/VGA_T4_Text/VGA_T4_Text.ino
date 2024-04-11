@@ -20,7 +20,7 @@ void setup() {
   // Get display dimensions
   vga4bit.getFbSize(&fb_width, &fb_height);
   // Set fontsize 8x8 or (8x16 available)
-  vga4bit.setFontSize(FONTSIZE);
+  vga4bit.setFontSize(FONTSIZE,false);
   // Setup 320x200 text window.
   vga4bit.setPrintWindow((fb_width-320)/2,(fb_height-200)/2, 320,200);
   // Set default foreground and background colors
@@ -36,9 +36,9 @@ void setup() {
   //  - blink rate of 30
   vga4bit.initCursor(0,0,7,11,true,30);
   // Turn cursor on
-  vga4bit.cursorOn();
+  vga4bit.tCursorOn();
   // Move cursor to home position
-  vga4bit.textat(0,0);
+  vga4bit.textxy(0,0);
   // Display a C64 like screen
   vga4bit.printf("\n    **** COMMODORE 64 BASIC V2 ****     \n");
   vga4bit.printf("\n 64K RAM SYSTEM  38911 BASIC BYTES FREE \n");
