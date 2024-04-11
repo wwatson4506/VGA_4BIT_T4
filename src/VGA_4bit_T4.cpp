@@ -90,12 +90,12 @@ PolyDef_t PolySet;  // will contain a polygon data
 //===============================================
 FLASHMEM void FlexIO2VGA::begin(const vga_timing& mode, bool half_height, bool half_width, unsigned int bpp) {
   frameCount = 0;
-  *(portConfigRegister(11)) = 4; // FLEXIO2_D2    RED
-  *(portConfigRegister(12)) = 4; // FLEXIO2_D1    GREEN
-  *(portConfigRegister(10)) = 4; // FLEXIO2_D0    BLUE
-  *(portConfigRegister(13)) = 4; // FLEXIO2_D3    INTENSITY
-  *(portConfigRegister(34)) = 4; // FLEXIO2_D29   VSYNC
-  *(portConfigRegister(35)) = 4; // FLEXIO2_D30   HSYNC
+  IOMUXC_SW_MUX_CTL_PAD_GPIO_B0_02 = 4; // FLEXIO2_D2    RED
+  IOMUXC_SW_MUX_CTL_PAD_GPIO_B0_01 = 4; // FLEXIO2_D1    GREEN
+  IOMUXC_SW_MUX_CTL_PAD_GPIO_B0_00 = 4; // FLEXIO2_D0    BLUE
+  IOMUXC_SW_MUX_CTL_PAD_GPIO_B0_03 = 4; // FLEXIO2_D3    INTENSITY
+  IOMUXC_SW_MUX_CTL_PAD_GPIO_B1_13 = 4; // FLEXIO2_D29   VSYNC
+  IOMUXC_SW_MUX_CTL_PAD_GPIO_B1_12 = 4; // FLEXIO2_D28   HSYNC
 
   dma_chans[0] = dma2.channel;
   dma_chans[1] = dma1.channel;
