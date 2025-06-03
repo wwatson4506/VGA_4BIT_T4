@@ -206,7 +206,6 @@ bool mouseEvent(void) {
 	mouse_msg.wheel = (int8_t)mouse1.getWheel(); // Check for wheel movement
 	mouse_msg.wheelH = (int8_t)mouse1.getWheelH();
 	scaleMouseXY();
-	mouse1.mouseDataClear();
 	return true;
 }
 
