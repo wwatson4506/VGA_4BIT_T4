@@ -159,19 +159,20 @@ void setup() {
 void loop() {
   myusb.Task();
   if(mouseEvent()) { // Wait for a mouse event.
+    // Set mouse cursor position.
+    vga4bit.moveGcursor(mouse_msg.scaledX, mouse_msg.scaledY); 
     vga4bit.printf("Mouse X: %4.4d\n", mouse_msg.scaledX);
     vga4bit.printf("Mouse Y: %4.4d\n", mouse_msg.scaledY);
     vga4bit.printf("Buttons: %d\n", getMouseButtons());
     vga4bit.printf("Wheel: %2d\n", mouse_msg.wheel);
     vga4bit.printf("WheelH: %2d\n", mouse_msg.wheelH);
     checkMouseClicks(); // Check for mouse button use.
-	scCount += getSnglClick(); // Add to Single Click Count.
-	dcCount += getDblClick(); // Add to Double Click Count.
+    scCount += getSnglClick(); // Add to Single Click Count.
+    dcCount += getDblClick(); // Add to Double Click Count.
     vga4bit.printf("Single Clicks: %d\n", scCount);
     vga4bit.printf("Double Clicks: %d\n", dcCount);
-	vga4bit.textxy(0,2); // Set print position.
-    // Set mouse cursor position.
-    vga4bit.moveGcursor(mouse_msg.scaledX, mouse_msg.scaledY); 
+    vga4bit.textxy(0,2); // Set print position.
+    mouse1.mouseDataClear();
   }
 }
 
