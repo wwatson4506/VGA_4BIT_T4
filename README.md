@@ -75,6 +75,7 @@ All files are heavily commented.
 
 ### TODO:
 - Fix incorrect aspect ratio of circle function.
- 
+- Rewrite mouse button single/double click and drag function(s).
+
 ## Again this is library is WIP and just for learning and playing with FlexIO2VGA capabilities...
 
