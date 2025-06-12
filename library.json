@@ -1,7 +1,7 @@
 {
 	"name": "VGA_4bit_T4",
 	"frameworks": "Arduino",
-	"platforms": "Teensy T4",
+	"platforms": "Teensy T4 micromod DB5",
 	"keywords": "VGA_4bit_T4",
 	"description": "wwatson VGA_4bit_T4 Library",
 	"version": "1.0.1",
