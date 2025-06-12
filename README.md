@@ -75,7 +75,7 @@ All files are heavily commented.
 - VGA_T4_Editor -- Fixed incomplete screen clear in 8090x600 screen mode.
 
 06-12-25
-
+- Added two new example sketches.
 
 ### TODO:
 - Fix incorrect aspect ratio of circle function.
