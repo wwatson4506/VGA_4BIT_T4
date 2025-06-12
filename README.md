@@ -1,4 +1,4 @@
-# VGA_4BIT_T4
+# VGA_4BIT_T4_FIXES
 
 ## This library is based on jmarsh's FlexIO2VGA sketch found here:
 
@@ -51,7 +51,7 @@ Each nibble (one pixel) can be one of 16 RGBI colors (0 to 15):
 There a few examples of usage including a graphic cursor as well as a simple screen editor using an adapted version of the Kilo editor found online here: https://viewsourcecode.org/snaptoken/kilo/.
 
 Examples:
-- VGA_T4_Editor -- Requires a USB keyboard plugged into the T4.1 USB host connector. The Kilo editor supports most common editor keys, simple syntax highlighting of C/CPP/BAS files, simple searching and horizontal scrolling of long lines. This sketch uses built in SD card reader and optionally a USB drive if using a USB hub. Uncomment "#define USE_USB_DRIVE 1" at begining of sketch to use USB drive. F1 key for help.
+- VGA_T4_Editor -- Requires a USB keyboard plugged into the T4.1 USB host connector. The Kilo editor supports most common editor keys, simple syntax highlighting of C/CPP/BAS files, simple searching and horizontal scrolling of long lines. This sketch uses built in SD card reader and optionally a USB drive if using a USB hub. Uncomment "#define USE_USB_DRIVE 1" at begining of sketch to use USB drive. F1 key for help in editor.
 - VGA_T4_Gauges  -- This is a version of Sumotoy's gauges sketch found in his RA8875 library.
 - VGA_T4_GraphicCursor -- An example of a software driven graphic cursor. Requires a USB mouse connected to the T4.1 USB host connector. There are four types of graphic cursors available (Block, Filled Arrow, Hollow Arrow and I-beam). This uses the "drawBitmap()" function to render the cursor. More could be added. Uses 8x16 bitmap.
 - Grahics -- Demonstrates some of the graphic primitives like drawing circles, filled circles, triangles, filled triangles, rectangles, filled rectangles, ellipses and filled ellipses. Filled ellipses have a problem with filling out of bounds with certain parameter combinations have not figured out why yet. Example of fail: fillEllipse(516, 419,59,61,VGA_BRIGHT_WHITE). Resolution does not matter.
@@ -62,5 +62,19 @@ Examples:
 
 All files are heavily commented.
 
+### CHANGES:
+
+06-11-25
+- VGA_T4_GraphicCursor.ino -- Single/Double click function disabled for now, it is blocking and needs rewrite. Also fixed mouse cursor trails when 8x8 font size is used.
+- Fixed and updated scrolling in all four directions. UP, down, left and right. Will be adding a sketch demonstrating scrolling capabiites.
+- VGA_T4_Windows_Test.ino -- Fixed several bugs and update windowing system.
+- VGA_T4_Editor -- Fixed incomplete screen clear in 8090x600 screen mode.
+
+06-12-25
+
+
+### TODO:
+- Fix incorrect aspect ratio of circle function.
+ 
 ## Again this is library is WIP and just for learning and playing with FlexIO2VGA capabilities...
 
