@@ -60,6 +60,10 @@ Examples:
 - VGA_T4_Box_Test -- Demonstrates allocating memory for saving and recalling sections of video memory. 
 - VGA_T4_Windows_Test -- A very simple windowing system.
 
+### Added sketches: 06-12-25
+- VGA_T4_Print_Window_demo.ino -- Demonstrates setting up a print window of various dimensions. Also demonstrates using colors, printing and scrolling.
+- VGA_T4_Scroll_Test.ino -- Demonstrates scrolling capabilities. Can scroll a print window in one of four directions, up, down, right and left. Also capable of scrolling graphics.
+
 All files are heavily commented.
 
 ### CHANGES:
