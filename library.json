@@ -4,7 +4,7 @@
 	"platforms": "Teensy T4",
 	"keywords": "VGA_4bit_T4",
 	"description": "wwatson VGA_4bit_T4 Library",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"authors":
 	{	"name": "Warren Watson",
 		"maintainer": true
