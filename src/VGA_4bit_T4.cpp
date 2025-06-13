@@ -63,6 +63,7 @@ DMAMEM uint8_t frameBuffer0[(MAX_HEIGHT+1)*(MAX_WIDTH+STRIDE_PADDING)];
 //uint8_t frameBuffer0[(MAX_HEIGHT+1)*(MAX_WIDTH+STRIDE_PADDING)];
 //EXTMEM uint8_t frameBuffer0[(MAX_HEIGHT+1)*(MAX_WIDTH+STRIDE_PADDING)];
 //static uint8_t frameBuffer1[(MAX_HEIGHT+1)*(MAX_WIDTH+STRIDE_PADDING)];
+
 static uint8_t* const s_frameBuffer[1] = {frameBuffer0};
 
 static uint32_t frameBufferIndex = 0;
@@ -2024,6 +2025,7 @@ FLASHMEM void FlexIO2VGA::textxy(int column, int line) {
 // Draw graphic cursor at current character position.
 // Cursor size vertically and horizontally are
 // based on font sizes 8x8 or 8x16. (8x16 max)
+// Fixed mouse pointer trails issue in 8x8 mode. 
 //================================================
 FLASHMEM void FlexIO2VGA::drawGcursor(int color) {
   if(gCursor.active) {
@@ -2042,12 +2044,16 @@ FLASHMEM void FlexIO2VGA::drawGcursor(int color) {
 // Move graphic cursor position to column/line.
 //=============================================
 FLASHMEM void FlexIO2VGA::moveGcursor(int16_t column, int16_t line) {
+//  bool isActive = false;
   if(gCursor.active) {
+//    gCursorOff();
+//    isActive = true;
     putGptr(gCursor.gCursor_x,gCursor.gCursor_y,gCursor.char_under_cursor);
     gCursor.gCursor_x = column;
     gCursor.gCursor_y = line;
     drawGcursor(foreground_color);
   }
+//  if(isActive) gCursorOn();
 }
 
 //======================================================================
@@ -2143,11 +2149,17 @@ FLASHMEM void FlexIO2VGA::setBackgroundColor(int8_t bg_color) { // RGBI format
 FLASHMEM size_t FlexIO2VGA::write(uint8_t c) {
   char buf[2];
   bool isActive = false;
-
-  // If cursor is active, set flag and turn off cursor.
+  bool isGCActive = false;
+  
+  // If text cursor is active, set flag and turn off cursor.
   if(tCursor.active) {
     tCursorOff();
     isActive = true;
+  }
+  // If graphic cursor is active, set flag and turn off cursor.
+  if(tCursor.active) {
+    gCursorOff();
+    isGCActive = true;
   }
   switch(c) {
     case '\r':
@@ -2196,6 +2208,7 @@ FLASHMEM size_t FlexIO2VGA::write(uint8_t c) {
   }
   updateTCursor(cursor_x, cursor_y);
   if(isActive) tCursorOn();
+  if(isGCActive) gCursorOn();
   return 1;
 }
 
