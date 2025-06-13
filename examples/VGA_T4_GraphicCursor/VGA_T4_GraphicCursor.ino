@@ -166,11 +166,13 @@ void loop() {
     vga4bit.printf("Wheel: %2d\n", mouse_msg.wheel);
     vga4bit.printf("WheelH: %2d\n", mouse_msg.wheelH);
     vga4bit.moveGcursor(mouse_msg.scaledX, mouse_msg.scaledY); 
-//    checkMouseClicks(); // Check for mouse button use.
+/*
+    checkMouseClicks(); // Check for mouse button use.
     scCount += getSnglClick(); // Add to Single Click Count.
     dcCount += getDblClick(); // Add to Double Click Count.
     vga4bit.printf("Single Clicks: %d\n", scCount);
     vga4bit.printf("Double Clicks: %d\n", dcCount);
+*/
     vga4bit.textxy(0,2); // Set print position.
     mouse1.mouseDataClear();
   }
