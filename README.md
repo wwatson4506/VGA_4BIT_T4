@@ -77,6 +77,9 @@ All files are heavily commented.
 06-12-25
 - Added two new example sketches.
 
+06-13-25
+- VGA_T4_GraphicCursor -- Fix issue with graphic mouse cursorr disappering under active text.
+
 ### TODO:
 - Fix incorrect aspect ratio of circle function.
 - Rewrite mouse button single/double click and drag function(s).
