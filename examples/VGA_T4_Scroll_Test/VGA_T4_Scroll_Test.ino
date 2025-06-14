@@ -6,7 +6,7 @@
 
 #include "VGA_4bit_T4.h"
 
-#define FONTSIZE 8
+#define FONTSIZE 16
 
 //const vga_timing *timing = &t1024x768x60;
 //const vga_timing *timing = &t800x600x60;
