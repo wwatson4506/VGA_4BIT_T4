@@ -33,28 +33,52 @@ void setup() {
   // Setup 590x355 text window.
   vga4bit.setPrintWindow((fb_width-590)/2,(fb_height-350)/2, 590,355);
 
-  // Set default foreground and background colors
-  vga4bit.setBackgroundColor(VGA_BLUE); 
-  vga4bit.setForegroundColor(VGA_BRIGHT_BLUE);
-
-  // Clear graphic screen
-  vga4bit.clear(VGA_BRIGHT_BLUE);
-
-  // Clear Print Window
-  vga4bit.clearPrintWindow();
-
-  // Move cursor to home position
-  vga4bit.textxy(0,0);
-
  // Initialize text cursor:
   //  - block cursor 7 pixels wide and 8 pixels high
   //  - blink enabled
   //  - blink rate of 30
   vga4bit.initCursor(0,0,7,11,true,30);
+}
 
+void loop() {
+
+  // Set default foreground and background colors
+  vga4bit.setBackgroundColor(VGA_BLACK); 
+  vga4bit.setForegroundColor(VGA_BRIGHT_GREEN);
+  // Clear graphic screen
+  vga4bit.clear(VGA_BRIGHT_GREEN);
+  // Clear Print Window
+  vga4bit.clearPrintWindow();
+  // Move cursor to home position
+  vga4bit.textxy(0,0);
+  vga4bit.setTcursorColor(VGA_BRIGHT_GREEN);
   // Turn cursor on
   vga4bit.tCursorOn();
+  // Display a C128 like screen
+  vga4bit.printf("\n                COMMODORE BASIC V7.0 122365 BYTES FREE\n");
+  vga4bit.printf("                    (C)1986 COMMODORE ELECTRONICS, LTD.\n");
+  vga4bit.printf("                          (C)1977 MICROSOFT CORP.\n");
+  vga4bit.printf("                            ALL RIGHTS RESERVED\n");
+  vga4bit.printf("\nREADY.\n");
+  vga4bit.printf("10 for i = 0 to 255\n");
+  vga4bit.printf("20   print i\n");
+  vga4bit.printf("30 next i\n");
+  vga4bit.printf("40 end\n");
+  delay(5000);
+  vga4bit.tCursorOff();
 
+  // Set default foreground and background colors
+  vga4bit.setBackgroundColor(VGA_BLUE); 
+  vga4bit.setForegroundColor(VGA_BRIGHT_BLUE);
+  // Clear graphic screen
+  vga4bit.clear(VGA_BRIGHT_BLUE);
+  // Clear Print Window
+  vga4bit.clearPrintWindow();
+  // Move cursor to home position
+  vga4bit.textxy(0,0);
+  vga4bit.setTcursorColor(VGA_BRIGHT_BLUE);
+  // Turn cursor on
+  vga4bit.tCursorOn();
   // Display a C64 like screen
   vga4bit.printf("\n                    **** COMMODORE 64 BASIC V2 ****     \n");
   vga4bit.printf("\n                 64K RAM SYSTEM 38911 BASIC BYTES FREE \n");
@@ -63,8 +87,6 @@ void setup() {
   vga4bit.printf("20   print i\n");
   vga4bit.printf("30 next i\n");
   vga4bit.printf("40 end\n");
-}
-
-void loop() {
-// Hang out here...
+  delay(5000);
+  vga4bit.tCursorOff();
 }

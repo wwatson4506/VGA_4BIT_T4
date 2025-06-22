@@ -1195,5 +1195,6 @@ int kilo(FS *type, char *filename) {
   vga4bit.setCursorBlink(true); // enable binking cursor
   vga4bit.setCursorType(0);		 // use block cursor
   vga4bit.clearPrintWindow();
+  
   return 0;
 }

@@ -15,7 +15,6 @@ const vga_timing *timing = &t640x480x60;
 
 // Must use this instance name (vga4bit). It is used in the driver.
 FlexIO2VGA vga4bit;
-//static int fb_width, fb_height;
 
 // Array of vga4bit Basic Colors
 const uint8_t myColors[] = {
@@ -75,7 +74,9 @@ void setup() {
   win[0].frameColor = VGA_BRIGHT_GREEN; // Frame color.
   win[0].frameType = DOUBLE_LINE;    // Frame type single or double lines.
   win[0].shadowEnable = true;        // Window shadow enable.
-  win[0].shadowColor = VGA_WHITE;    // Shadow color.
+  win[0].shadowPattern = 176;        // shadow pattern.
+  win[0].shadowColor = VGA_WHITE;    // Shadow foreground color.
+  win[0].shadowBGColor = VGA_BLACK;  // Shadow backgraound color.
   win[0].titleColor = VGA_BRIGHT_RED; // Widow title color
   win[0].winTitle = (const char *)"TEENSY WINDOW 1"; // Window title (centered).
 
@@ -91,13 +92,16 @@ void setup() {
   win[1].frameColor = VGA_BLACK;
   win[1].frameType = DOUBLE_LINE;
   win[1].shadowEnable = true;
-  win[1].shadowColor = VGA_WHITE;
+  win[1].shadowPattern = 219;
+  win[1].shadowColor = VGA_BLACK;
+  win[1].shadowBGColor = VGA_BLACK;
   win[1].titleColor = VGA_BLUE;
   win[1].winTitle = (const char *)"TEENSY WINDOW 2 ";
 
-
+  uint8_t deskTopPattern = 178; // Sets desktop background pattern.
   // Create a desktop
-  desktop(VGA_CYAN, SINGLE_LINE, VGA_BRIGHT_WHITE, VGA_BRIGHT_YELLOW, (const char *)"T E E N S Y  4.1  D E S K T O P");
+  desktop(VGA_CYAN, SINGLE_LINE, VGA_BRIGHT_WHITE, deskTopPattern, VGA_BRIGHT_YELLOW,
+         (const char *)"T E E N S Y  4.1  D E S K T O P");
 
   if((err = openWindow(0)) < 0)
     Serial.printf("Window %d is already open or window number is greater then 10\n", 0) ;

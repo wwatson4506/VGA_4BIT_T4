@@ -34,7 +34,6 @@ const vga_timing *timing = &t800x600x60;
 
 // Must use this instance name. It's used in the driver.
 FlexIO2VGA vga4bit;
-static int fb_width, fb_height;
 
 #define FONTSIZE 16
 
@@ -53,27 +52,12 @@ void setup() {
   //                    double Width  = false
   //                    Color Depth   = 4 bits, Mono not supported yet.
   vga4bit.begin(*timing, false, false, 4);
-  // Get display dimensions
-  vga4bit.getFbSize(&fb_width, &fb_height);
   // Set fontsize 8x8 or (8x16 available)
   vga4bit.setFontSize(FONTSIZE, false);
   // Set default foreground and background colors
   vga4bit.setBackgroundColor(VGA_BLUE); 
-
-  fb_width = vga4bit.getTwidth();
-  fb_height = vga4bit.getTheight();
   
-  //=====================================================
-  // Clear the character print window in 800x600 mode
-  // with a font height of 16 needs fb_height adjusted
-  // to 38 characters as 600 / (font_height == 16) = 37.5
-  // character lines. which returns an int of 37. So we
-  // set fb_height to 38 so complete screen is cleared.
-  // A font_height of 8 gives an even 75 character lines.
-  // The following two lines set the proper
-  //======================================================
-  if((fb_height == 37) && (FONTSIZE == 16)) fb_height = 38; // Adjust if needed.
-  vga4bit.setPrintCWindow(0, 0, fb_width, fb_height); // Set print window size.
+  vga4bit.setPrintCWindow(0, 0, vga4bit.getTwidth(), vga4bit.getTheight()); // Set print window size.
 
   // Now clear Print Window
   vga4bit.clearPrintWindow();

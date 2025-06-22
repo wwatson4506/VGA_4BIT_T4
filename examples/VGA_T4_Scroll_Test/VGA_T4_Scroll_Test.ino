@@ -21,12 +21,12 @@ int i=0;
 
 void setup() {
   while(!Serial);
-  Serial.printf("%c",12);
+  Serial.printf("%c",12); // Clears terminal screen on VT100 style terminal.
 
   vga4bit.stop();
   // Setup VGA display: 1024x768x60
-  //                    double Height = false
   //                    double Width  = false
+  //                    double Height = false
   //                    Color Depth   = 4 bits
   vga4bit.begin(*timing, false, false, 4);
   // Set fontsize 8x16 or (8x8 available)

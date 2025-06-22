@@ -79,7 +79,8 @@ void setup() {
   vga4bit.printf("within the boundries of the print window.\n");
   vga4bit.setForegroundColor(VGA_BRIGHT_WHITE);
   vga4bit.setBackgroundColor(VGA_CYAN); 
-  box_draw(9, 9, 26+5, 50, 2);
+  box_draw(9, 9, 26+5, 50, 2); // last parameter: 1 = single line frame
+                               //                 2 = double line frame
   vga4bit.setPrintCWindow(10,10,40,21);
   vga4bit.setBackgroundColor(VGA_BLACK);
   vga4bit.clearPrintWindow();
@@ -88,7 +89,7 @@ void setup() {
 void loop() {
   vga4bit.setForegroundColor(random(16)); // Set random foreground colors.
   vga4bit.printf("%c",random(33)+32); // Print random characters.
-  delay(5); // Set to zero to see fastest scroll speed.
+  delay(4); // Set to zero to see fastest scroll speed.
 }
 
 void waitforInput() {
