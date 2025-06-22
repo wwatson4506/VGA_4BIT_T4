@@ -26,14 +26,16 @@ typedef struct {
   uint8_t frameColor;
   uint8_t frameType;
   bool shadowEnable = false;
+  uint8_t shadowPattern;
   uint8_t shadowColor;
+  uint8_t shadowBGColor;
   uint8_t titleColor;
   const char *winTitle;
   uint8_t *winbuf = NULL;
 } vgawin_t;
 
 uint8_t getCenteredTextX(uint8_t xwidth, const char * str);
-int desktop(uint8_t bgColor, uint8_t frameType, uint8_t frameColor,uint8_t titleColor, const char *deskTitle);
+int desktop(uint8_t bgColor, uint8_t frameType, uint8_t frameColor, uint8_t pattern, uint8_t titleColor, const char *deskTitle);
 int titleWindow(int winNum, uint8_t titleColor, const char *title);
 int openWindow(int winNum);
 vgawin_t *getWinPointer(void);

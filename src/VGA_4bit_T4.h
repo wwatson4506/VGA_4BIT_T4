@@ -394,8 +394,8 @@ public:
 
   FlexIO2VGA() {};
 
-  void begin(const vga_timing& mode, bool half_height=false,
-             bool half_width=false, unsigned int bpp=4);
+  void begin(const vga_timing& mode, bool half_width=false,
+             bool half_height=false, unsigned int bpp=4);
   void stop(void);
 
   // wait parameter:

@@ -20,14 +20,14 @@ uint8_t getCenteredTextX(uint8_t xwidth, const char * str) {
 // titleColor: color of title in title bar.
 // deskTitle:  desk top title (centered).
 //============================================================
-int desktop(uint8_t bgColor, uint8_t frameType, uint8_t frameColor,uint8_t titleColor, const char *deskTitle) {
+int desktop(uint8_t bgColor, uint8_t frameType, uint8_t frameColor, uint8_t pattern, uint8_t titleColor, const char *deskTitle) {
   uint8_t tempFGC = vga4bit.getFGC();
   uint8_t tempBGC = vga4bit.getBGC();
   uint8_t centerText = getCenteredTextX(vga4bit.getTwidth(),deskTitle);  
 
   box_color(0,0,2,vga4bit.getTwidth()-1, bgColor);
   vga4bit.setForegroundColor(bgColor);
-  box_charfill(2, 0, vga4bit.getTheight(), vga4bit.getTwidth()-1, 178);
+  box_charfill(2, 0, vga4bit.getTheight(), vga4bit.getTwidth()-1, pattern);
   vga4bit.setBackgroundColor(bgColor);
   vga4bit.setForegroundColor(frameColor);
   box_draw(0 , 0, vga4bit.getTheight()-1, vga4bit.getTwidth()-1, frameType);
@@ -100,12 +100,12 @@ int openWindow(int winNum) {
 
   if(windows[winNum].shadowEnable) {
     tempBGC = vga4bit.getBGC();
-    vga4bit.setBackgroundColor(VGA_BLACK);
+    vga4bit.setBackgroundColor(windows[winNum].shadowBGColor);
     vga4bit.setForegroundColor(windows[winNum].shadowColor);
     box_charfill(windows[winNum].y2+4,windows[winNum].x1+1,windows[winNum].y2+4,
-              windows[winNum].x2+1, 176);
+              windows[winNum].x2+1, windows[winNum].shadowPattern);
     box_charfill(windows[winNum].y1+1,windows[winNum].x2+2,windows[winNum].y2+4,
-              windows[winNum].x2+2, 176);
+              windows[winNum].x2+2, windows[winNum].shadowPattern);
     vga4bit.setBackgroundColor(tempBGC);
   }
   
