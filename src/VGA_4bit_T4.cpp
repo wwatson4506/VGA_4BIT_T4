@@ -58,10 +58,12 @@
  * HSYNC (35) <---------------68R---------------------------> VGA PIN 13 - T4 pin 35
  */
 
+// Frame buffer configurations. Un-comment one at a time.
 DMAMEM uint8_t frameBuffer0[(MAX_HEIGHT+1)*(MAX_WIDTH+STRIDE_PADDING)];
 //uint8_t frameBuffer0[(MAX_HEIGHT+1)*(MAX_WIDTH+STRIDE_PADDING)];
 //EXTMEM uint8_t frameBuffer0[(MAX_HEIGHT+1)*(MAX_WIDTH+STRIDE_PADDING)];
 //static uint8_t frameBuffer1[(MAX_HEIGHT+1)*(MAX_WIDTH+STRIDE_PADDING)];
+
 static uint8_t* const s_frameBuffer[1] = {frameBuffer0};
 
 static uint32_t frameBufferIndex = 0;
@@ -88,7 +90,7 @@ PolyDef_t PolySet;  // will contain a polygon data
 //  bpp: Bits per pixel 1 or 4.
 //         (only 4 bit pixels spported at this time) 
 //===============================================
-FLASHMEM void FlexIO2VGA::begin(const vga_timing& mode, bool half_height, bool half_width, unsigned int bpp) {
+FLASHMEM void FlexIO2VGA::begin(const vga_timing& mode, bool half_width, bool half_height, unsigned int bpp) {
   frameCount = 0;
   IOMUXC_SW_MUX_CTL_PAD_GPIO_B0_02 = 4; // FLEXIO2_D2    RED
   IOMUXC_SW_MUX_CTL_PAD_GPIO_B0_01 = 4; // FLEXIO2_D1    GREEN
@@ -515,9 +517,15 @@ FLASHMEM void FlexIO2VGA::initCursor(uint8_t xStart, uint8_t yStart, uint8_t xEn
 // Set text cursor color.
 //=====================================
 void FlexIO2VGA::setTcursorColor(uint8_t cursorColor) {
+  bool isActive = false;
+  if(tCursor.active) isActive = true;
+  tCursorOff();
   tCursor.color = cursorColor;
   putChar(tCursorX(),tCursorY(),tCursor.char_under_cursor);
-  drawTcursor(tCursor.color);
+  if(isActive) {
+    drawTcursor(tCursor.color);
+    tCursorOn();
+  }
 }
 
 //=====================================
@@ -812,7 +820,7 @@ FLASHMEM void FlexIO2VGA::draw_v_line(int16_t x, int16_t y, int16_t lenght, uint
 FLASHMEM void FlexIO2VGA::drawRect(int x0, int y0, int x1, int y1, int color) {
   bool wasActive = false;
   if(gCursor.active) {
-    gCursorOff(); // Must turn of software driven graphic cursor if on !!
+    gCursorOff(); // Must turn off software driven graphic cursor if on !!
     wasActive = true;
   }
   drawHLine(y0, x0, x1, color);
@@ -1494,7 +1502,7 @@ FLASHMEM void FlexIO2VGA::copy(int s_x, int s_y, int d_x, int d_y, int w, int h)
   uint8_t c = 0;  
   int off_x;
   int off_y;
-  
+
   // nothing to copy ?
   if((w <= 0) || (h <= 0)) return;
   
@@ -1536,10 +1544,12 @@ FLASHMEM void FlexIO2VGA::copy(int s_x, int s_y, int d_x, int d_y, int w, int h)
   if(error >= fb_width) c_w = fb_width - c_d_x;
   error = c_d_y + c_h;
   if(error >= fb_height) c_h = fb_height - c_d_y;
+
   // nothing left to copy ?
   if((c_w <= 0) || (c_h <= 0)) return;
+
   if(c_d_y > c_s_y) {
-    // copy from last line
+    // copy from last line FIXED for scroll down
     sypos = c_s_y + c_h - 1;
     dypos = c_d_y + c_h - 1;
     dy = -1;
@@ -1550,9 +1560,9 @@ FLASHMEM void FlexIO2VGA::copy(int s_x, int s_y, int d_x, int d_y, int w, int h)
     dy = 1;
   }
   if(c_d_x > c_s_x) {
-      // copy from last line pixel
-      sxpos = c_s_x + c_w - 1;
-      dxpos = c_d_x + c_w - 1;
+      // copy from last line pixel FIXED for scroll left and right.
+      sxpos = c_s_x + c_w;// - 1;
+      dxpos = c_d_x + c_w;// - 1;
       dx = -1;
   } else {
     // copy from first line pixel
@@ -1560,6 +1570,8 @@ FLASHMEM void FlexIO2VGA::copy(int s_x, int s_y, int d_x, int d_y, int w, int h)
     dxpos = c_d_x;
     dx = 1;
   }
+  
+  // Do copy...
   for(off_y = 0; off_y < c_h; off_y++) {
     for(off_x = 0; off_x < c_w; off_x++) {
       // Get existing gpixel info (byte).
@@ -1602,8 +1614,8 @@ FLASHMEM void FlexIO2VGA::init_text_settings() {
   promp_size = 0;  
   print_window_x = 0;
   print_window_y = 0;
-  print_window_w = fb_width / font_width;
-  print_window_h = fb_height / font_height;
+  print_window_w = fb_width / font_width / (double_width ? 2:1);
+  print_window_h = fb_height / font_height / (double_height ? 2:1);
 
   foreground_color = VGA_BRIGHT_WHITE;
   background_color = VGA_BLUE;
@@ -1615,7 +1627,7 @@ FLASHMEM void FlexIO2VGA::init_text_settings() {
   tCursor.tCursor_x = 0;
   tCursor.tCursor_y = 0;
   tCursor.active = false;
-  vga4bit.initCursor(1,0,8,8,true,30); 
+  vga4bit.initCursor(1,0,7,7,true,30); 
   vga4bit.initGcursor(0,1,0,8,8);
 }
 
@@ -1650,15 +1662,16 @@ FLASHMEM void FlexIO2VGA::putChar(int16_t x, int16_t y, uint8_t *buf) {
 }
 
 //====================================================
-// Get a character from frame buffer:
+// Get a character under next mouse pointer position
+// from frame buffer and save it:
 // x = starting x position in frame buffer.
 // y = starting y position in frame buffer.
 // font_width / 2 (2 pixels per byte).
 // font_height * 2 (compensate for font_width / 2).
+// Note: Mouse pointer size is always fixed at 8x16.
 //====================================================
 FLASHMEM void FlexIO2VGA::getGptr(int16_t x, int16_t y, uint8_t *buf) {
-//  for(int16_t i = 0; i < font_height*2+1; i++) {
-  for(int16_t i = 0; i < font_height; i++) {
+  for(int16_t i = 0; i < font_height*2+1; i++) {
     for(int16_t j = 0; j < (font_width/2)+1; j++) {
       *buf++ = getByte((x/2)+j, y+i);
     }
@@ -1666,15 +1679,17 @@ FLASHMEM void FlexIO2VGA::getGptr(int16_t x, int16_t y, uint8_t *buf) {
 }
 
 //====================================================
-// Write a character to frame buffer:
+// Draw a graphic pointer to frame buffer and replace
+// with previously saved character (with getGptr()) at 
+// previous pointer position:
 // x = starting x position in frame buffer.
 // y = starting y position in frame buffer.
 // font_width / 2 (2 pixels per byte).
 // font_height * 2 (compensate for font_width / 2).
+// Note: Mouse pointer size is always fixed at 8x16.
 //====================================================
 FLASHMEM void FlexIO2VGA::putGptr(int16_t x, int16_t y, uint8_t *buf) {
-//  for(int16_t i = 0; i < font_height*2+1; i++) {
-  for(int16_t i = 0; i < font_height; i++) {
+  for(int16_t i = 0; i < font_height*2+1; i++) {
     for(int16_t j = 0; j < (font_width/2)+1; j++) {
       putByte((x/2)+j, y+i, *buf++);
     }
@@ -1746,24 +1761,17 @@ FLASHMEM int FlexIO2VGA::setFontSize(uint8_t fsize, bool runflag) {
   promp_size = 0;
   print_window_h = fb_height / font_height;
   setBlkCursorDims(tCursor.x_start,tCursor.y_start,tCursor.x_end,font_height,0);
-  if(!runflag) clear(background_color);
+  if(runflag == true) clear(background_color);
   return (int)fsize;
 }
 
 //======================================================
-// Load a font from memory or file.
-// filename: font file.
-//      src: true = from font file, false = from memory.
+// Load a font from memory to current char array.
+// font: font is a pointer to a char array (4096 bytes).
 //======================================================
-FLASHMEM int FlexIO2VGA::fontLoad(const char *filename, bool src) {
-  if(src) {
-    
-  } else {
-//    memcpy(currentFont,font_8x16,sizeof(font_8x16));
-//    for(uint16_t i = 0; i < sizeof(font_8x16); i++) {
-//	  currentFont[i] = font_8x16[i];
-//	}
-  }	  
+FLASHMEM int FlexIO2VGA::fontLoadMem(uint8_t *font) {
+
+  memcpy(currentFont,font,sizeof(currentFont));
   return (int)0;
 }
 
@@ -1790,7 +1798,7 @@ FLASHMEM void FlexIO2VGA::drawText(int16_t x, int16_t y, const char * text, uint
       charPointer = &font_8x8[t*font_height];
     else
 //      charPointer = &font_8x16[t*font_height];
-      charPointer = &currentFont[t*font_height];
+      charPointer = &currentFont[t*font_height]; // currentFont[] is a loadable font buffer.
     for(j = 0; j < font_height; j++) {
       b = *charPointer++;
       for(i = 0; i < font_width; i++) {
@@ -1852,8 +1860,8 @@ FLASHMEM void FlexIO2VGA::setPrintCWindow(uint8_t x, uint8_t y, uint8_t width, u
     print_window_y = (y *font_height);
   }
 
-  print_window_w = width;// / (double_width ? 2:1);
-  print_window_h = height;// / (double_height ? 2:1);
+  print_window_w = width / (double_width ? 2:1);
+  print_window_h = height / (double_height ? 2:1);
 }
 
 //=========================================
@@ -1883,9 +1891,25 @@ FLASHMEM void FlexIO2VGA::setPrintWindow(int x, int y, int width, int height) {
 // Clear a text window to current backgraound color.
 //==================================================
 FLASHMEM void FlexIO2VGA::clearPrintWindow() {
+  //=====================================================
+  // Clear the character print window in 800x600 mode
+  // with a font height of 16 needs fb_height adjusted
+  // to 38 characters as 600 / (font_height == 16) = 37.5
+  // character lines. which returns an int of 37. So we
+  // set fb_height to 38 so complete screen is cleared.
+  // A font_height of 8 gives an even 75 character lines.
+  // The following two lines set the proper
+  //======================================================
+  uint8_t adjust = 0;
+  if(((fb_height / font_height) == 37/*37.5*/) && (font_height == 16)) {
+    adjust = 38; // Adjust if needed for 800x600, fontsize 16 full screen.
+  } else {
+    adjust = font_height; // Normal defined print window less than 800x600.
+  }
+
   fillRect(print_window_x, print_window_y, print_window_x +
-          (print_window_w+1) * font_width, print_window_y +
-          (print_window_h+1) * font_height, background_color);
+          (print_window_w) * font_width, print_window_y +
+          (print_window_h) * adjust, background_color);
   cursor_x = 0;
   cursor_y = 0;
   getChar(tCursorX(),tCursorY(),tCursor.char_under_cursor);
@@ -1903,15 +1927,15 @@ FLASHMEM void FlexIO2VGA::unsetPrintWindow() {
 }
 
 //=========================================
-// Scroll up text one line. (Slow!)
+// Scroll up text one row. (Slow!)
 // Set font_height to "-font_height" (negative)
-// to scroll up one line.
+// to scroll up one row.
 //=========================================
 FLASHMEM void FlexIO2VGA::scrollUpPrintWindow() {
-  // move the 2nd line and the following ones one line up
+  // move the 2nd row and the following ones one row up
   Vscroll(print_window_x, print_window_y + font_height, 
-          print_window_w * font_width, (print_window_h - 1) *
-         font_height, -font_height, background_color);
+  (print_window_w) * font_width * (double_width ? 2:1), (print_window_h - 1) *
+  font_height, -font_height, background_color);
 }
 
 //=========================================
@@ -1920,34 +1944,34 @@ FLASHMEM void FlexIO2VGA::scrollUpPrintWindow() {
 // to scroll down one line.
 //=========================================
 FLASHMEM void FlexIO2VGA::scrollDownPrintWindow() {
-  // move the 2nd line and the following ones one line up
-  Vscroll(print_window_x, print_window_y + font_height, 
-          print_window_w * font_width, (print_window_h - 1) *
-          font_height, font_height, background_color);
+  // move the 2nd line and the following ones one line down
+  Vscroll(print_window_x, print_window_y, 
+  (print_window_w) * font_width, (print_window_h - 1) * font_height,
+  font_height, background_color);
 }
 
 //=============================================
-// Scroll up text one line. (Slow!)
-// Set font_height to "-font_height" (negative)
-// to scroll up one line.
+// Scroll right text one column. (Slow!)
+// Set font_width to "-font_width" (negative)
+// to scroll right one column.
 //=============================================
-FLASHMEM void FlexIO2VGA::scrollUp() {
-  // move the 2nd line and the following ones one line up
-  Vscroll(print_window_x, print_window_y + font_height, 
-          print_window_w * font_width, (print_window_h - 1) *
-          font_height, -font_height, background_color);
+FLASHMEM void FlexIO2VGA::scrollRightPrintWindow() {
+  // move the 2nd column and the following ones one column right
+  Hscroll(print_window_x, print_window_y,// + font_height,
+  (print_window_w) * font_width, (print_window_h) * font_height,
+  font_width, background_color);
 }
 
 //============================================
-// Scroll down text one line. (Slow!)
-// Set font_height to "font_height" (positive)
-// to scroll down one line.
+// Scroll left text one column. (Slow!)
+// Set font_width to "font_width" (positive)
+// to scroll left one column.
 //============================================
-FLASHMEM void FlexIO2VGA::scrollDown() {
-  // move the 2nd line and the following ones one line up
-  Vscroll(print_window_x, print_window_y + font_height, 
-          print_window_w * font_width, (print_window_h - 1) *
-          font_height, font_height, background_color);
+FLASHMEM void FlexIO2VGA::scrollLeftPrintWindow() {
+  // move the 2nd column and the following ones one column left
+  Hscroll(print_window_x, print_window_y,// + font_height,
+  (print_window_w) * font_width, (print_window_h) * font_height,
+  -font_width, background_color);
 }
 
 //============================================
@@ -1998,6 +2022,7 @@ FLASHMEM void FlexIO2VGA::textxy(int column, int line) {
 // Draw graphic cursor at current character position.
 // Cursor size vertically and horizontally are
 // based on font sizes 8x8 or 8x16. (8x16 max)
+// Fixed mouse pointer trails issue in 8x8 mode. 
 //================================================
 FLASHMEM void FlexIO2VGA::drawGcursor(int color) {
   if(gCursor.active) {
@@ -2016,12 +2041,16 @@ FLASHMEM void FlexIO2VGA::drawGcursor(int color) {
 // Move graphic cursor position to column/line.
 //=============================================
 FLASHMEM void FlexIO2VGA::moveGcursor(int16_t column, int16_t line) {
+  bool isActive = false;
   if(gCursor.active) {
+    gCursorOff();
+    isActive = true;
     putGptr(gCursor.gCursor_x,gCursor.gCursor_y,gCursor.char_under_cursor);
     gCursor.gCursor_x = column;
     gCursor.gCursor_y = line;
     drawGcursor(foreground_color);
   }
+  if(isActive) gCursorOn();
 }
 
 //======================================================================
@@ -2032,52 +2061,49 @@ FLASHMEM void FlexIO2VGA::moveGcursor(int16_t column, int16_t line) {
 // (only when horizontal (dy=0) or vertical scroll (dx=0))
 //======================================================================
 FLASHMEM void FlexIO2VGA::scroll(int x, int y, int w, int h, int dx, int dy,int col) {
-	if(dy == 0)
-	{
-		if(dx == 0)
-			return;
-
-		Hscroll(x, y, w, h, dx, col);
-	}
-	else if(dx == 0)
-	{
-		Vscroll(x, y, w, h, dy, col);
-	}
-	else
-	{
-		copy(x, y, x + dx, y + dy, w, h);
-	}
-
-}
-
-//======================================================================
-// Hscroll used by scroll(). Scrolls right or left.
-//======================================================================
-inline void FlexIO2VGA::Hscroll(int x, int y, int w, int h, int dx, int col)
-{
-  copy(x, y, x + dx, y, w, h);
-  // fill empty area created with col
-  if(dx > 0) {
-    // move to the right => fill area on the left side of source area
-    fillRect(x, y, x + dx - 1 , y + h, col);
+  if(dy == 0)	{
+    if(dx == 0) return; // If dx and dy == 0 then error. Return.
+    Hscroll(x, y, w, h, dx, col);
+  }	else if(dx == 0) {
+    Vscroll(x, y, w, h, dy, col);
   }	else {
-    // move to the left => fill area on the right side of source area
-    fillRect(x + w + dx, y, x + w - 1 , y + h, col);
+    copy(x, y, x + dx, y + dy, w, h);
   }
 }
 
 //======================================================================
-// Vscroll used by scroll(). Scrolls up or down.
+// Hscroll used by scroll(). Scrolls right or left. Fixed 06-11-25
+// dx < 0 = scroll left. dy >= 0 = scroll right.
+//======================================================================
+void FlexIO2VGA::Hscroll(int x, int y, int w, int h, int dx, int col)
+{
+  // Copy print window left or right 1 position.
+  copy(x, y, x + dx, y, w, h);
+
+  // fill empty area created with col (background color).
+  if(dx > 0) {
+    // move to the right => fill area on the left side of source area with col.
+    fillRect(x, y, x + dx , y + h - 1, col); // this. FIXED 
+  }	else {
+    // move to the left => fill area on the right side of source area with col.
+    fillRect(x + w + dx, y, x + w, y + h, col); // this. FIXED
+  }
+}
+
+//======================================================================
+// Vscroll used by scroll(). Scrolls up or down. 
+// dy < 0 = scroll up. dy >= 0 = scroll down.
 //======================================================================
 inline void FlexIO2VGA::Vscroll(int x, int y, int w, int h, int dy, int col) {
+  // Copy print window up or down 1 position.
   copy(x, y, x, y + dy, w, h);
-  // fill empty area created with col
+  // fill empty area created with col (background color).
   if(dy > 0) {
     // move to the bottom => fill area on the top side of source area
-    fillRect(x, y, x + w - 1 , y + dy, col);
+    fillRect(x, y, x + w - 1, y + dy - 1, col);
   }	else {
     // move to the top => fill area on the bottom side of source are
-    fillRect(x, y + h + dy, x + w - 1 , y + h, col);
+    fillRect(x, y + h + dy, x + w - 1, y + h - 1, col);
   }
 }
 
@@ -2117,11 +2143,17 @@ FLASHMEM void FlexIO2VGA::setBackgroundColor(int8_t bg_color) { // RGBI format
 FLASHMEM size_t FlexIO2VGA::write(uint8_t c) {
   char buf[2];
   bool isActive = false;
-
-  // If cursor is active, set flag and turn off cursor.
+  bool isGCActive = false;
+    
+  // If text cursor is active, set flag and turn off cursor.
   if(tCursor.active) {
     tCursorOff();
     isActive = true;
+  }
+  // If graphic cursor is active, set flag and turn off cursor.
+  if(tCursor.active) {
+    gCursorOff();
+    isGCActive = true;
   }
   switch(c) {
     case '\r':
@@ -2130,9 +2162,9 @@ FLASHMEM size_t FlexIO2VGA::write(uint8_t c) {
     case '\n': // Proccess linefeed.
       cursor_x = 0;
       cursor_y ++;
-      if(cursor_y >= print_window_h) {
+      if(cursor_y >= (print_window_h /*/ (double_height ? 2:1)*/)) {
         scrollUpPrintWindow(); // Scroll up one line.
-        cursor_y = print_window_h - 1;
+        cursor_y = (print_window_h - 1);// / (double_height ? 2:1);
       }
       break;
     case 127: // Destructive Backspace
@@ -2160,7 +2192,7 @@ FLASHMEM size_t FlexIO2VGA::write(uint8_t c) {
     break;
     default:
       // not enough space on the line ?
-      if(cursor_x >= print_window_w) write('\n'); // Do linefeed.
+      if(cursor_x >= (print_window_w * (double_width ? 2:1))) write('\n'); // Do linefeed.
       buf[0] = c;
       buf[1] = '\0';
       drawText(print_window_x + cursor_x * font_width,
@@ -2170,6 +2202,7 @@ FLASHMEM size_t FlexIO2VGA::write(uint8_t c) {
   }
   updateTCursor(cursor_x, cursor_y);
   if(isActive) tCursorOn();
+  if(isGCActive) gCursorOn();
   return 1;
 }
 
@@ -2197,7 +2230,7 @@ FLASHMEM void FlexIO2VGA::slWrite(int16_t x,  uint16_t fgcolor,
 // lines. We subtract 8 from fb_height to get
 // an even 37 character lines. A font_height
 // of 8 gives an even 75 character lines.
-//=========+=================================
+//===========================================
 FLASHMEM void FlexIO2VGA::clearStatusLine(uint8_t bgc) {
   if((fb_height == 600) && (font_height == 16)) {
     fillRect(0, fb_height-font_height-8, fb_width, fb_height-8,bgc);
@@ -2563,6 +2596,36 @@ FASTRUN void FlexIO2VGA::ISR(void) {
   }
 
   asm volatile("dsb");
+}
+void vgadump(uint8_t *memory, uint16_t len) {
+   	uint16_t	i=0, j=0;
+	unsigned char	c=0;
+
+//	printf("                     (FLASH) MEMORY CONTENTS");
+	Serial.printf("\n\rADDR          00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F");
+	Serial.printf("\n\r-------------------------------------------------------------\n\r");
+
+
+	for(i = 0; i <= (len-1); i+=16) {
+//		phex16((i + memory));
+		Serial.printf("%8.8x",(unsigned int)(i + memory));
+		Serial.printf("      ");
+		for(j = 0; j < 16; j++) {
+			c = memory[i+j];
+			Serial.printf("%2.2x",c);
+			Serial.printf(" ");
+		}
+		Serial.printf("  ");
+		for(j = 0; j < 16; j++) {
+			c = memory[i+j];
+			if(c > 31 && c < 127)
+				Serial.printf("%c",c);
+			else
+				Serial.printf(".");
+		}
+//		_delay_ms(10);
+		Serial.printf("\n");
+	}
 }
 
 /* END VGA driver code */
