@@ -73,7 +73,7 @@ There a few examples of usage including a graphic cursor as well as a simple scr
 
 - VGA_T4_Text.ino -- Displays a couple of text screens repeatedly.
 
-- Loadable_Font_Demo.ino -- To use this sketch you will need to copy the four '.fnt' files found in the same directory as this sketch to an SD card or a USB drive. The file names are "bold.fnt", " italics.fnt", "" standard.fnt", " thin.fnt". The font files are 4096 bytes in size and represent 256x16 font array. One define in sketch used to switch between SD card or USB drive usage.
+- Loadable_Font_Demo.ino -- To use this sketch you will need to copy the four '.fnt' files found in the same directory as this sketch to an SD card or a USB drive. The file names are "bold.fnt", " italics.fnt", "" standard.fnt", " thin.fnt". The font files are 4096 bytes in size and represent 256x16 font array. One define in sketch is used to switch between SD card or USB drive usage.
 
 Filled ellipses have a problem with filling out of bounds with certain parameter combinations have not figured out why yet. Example of fail: fillEllipse(516, 419,59,61,VGA_BRIGHT_WHITE). Resolution does not matter.- More to come MAYBE...
 
@@ -96,11 +96,11 @@ All files are heavily commented.
 - VGA_T4_GraphicCursor -- Fix issue with graphic mouse cursor disappering under active text.
 
 ### Added sketch: 06-25-25
-- Double_Size_Font_Test.ino -- see the above requirements for this sketch. (Requirements also noted in the sketch).
+- Double_Size_Font_Test.ino
 - Several more bug fixes.
 
 ### Added sketch: 06-25-25
-- Loadable_Font_Demo.ino
+- Loadable_Font_Demo.ino -- see the above requirements for this sketch. (Requirements also noted in the sketch). One define in sketch is used to switch between SD card or USB drive usage.
 - Updated source files for loadable fonts
 
 ### TODO:
