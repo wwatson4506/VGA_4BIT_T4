@@ -1766,19 +1766,12 @@ FLASHMEM int FlexIO2VGA::setFontSize(uint8_t fsize, bool runflag) {
 }
 
 //======================================================
-// Load a font from memory or file.
-// filename: font file.
-//      src: true = from font file, false = from memory.
+// Load a font from memory to current char array.
+// font: font is a pointer to a char array (4096 bytes).
 //======================================================
-FLASHMEM int FlexIO2VGA::fontLoad(const char *filename, bool src) {
-  if(src) {
-    
-  } else {
-//    memcpy(currentFont,font_8x16,sizeof(font_8x16));
-//    for(uint16_t i = 0; i < sizeof(font_8x16); i++) {
-//	  currentFont[i] = font_8x16[i];
-//	}
-  }	  
+FLASHMEM int FlexIO2VGA::fontLoadMem(uint8_t *font) {
+
+  memcpy(currentFont,font,sizeof(currentFont));
   return (int)0;
 }
 
@@ -1805,7 +1798,7 @@ FLASHMEM void FlexIO2VGA::drawText(int16_t x, int16_t y, const char * text, uint
       charPointer = &font_8x8[t*font_height];
     else
 //      charPointer = &font_8x16[t*font_height];
-      charPointer = &currentFont[t*font_height];
+      charPointer = &currentFont[t*font_height]; // currentFont[] is a loadable font buffer.
     for(j = 0; j < font_height; j++) {
       b = *charPointer++;
       for(i = 0; i < font_width; i++) {
@@ -2151,7 +2144,6 @@ FLASHMEM size_t FlexIO2VGA::write(uint8_t c) {
   char buf[2];
   bool isActive = false;
   bool isGCActive = false;
-  short pwHeight = 0;
     
   // If text cursor is active, set flag and turn off cursor.
   if(tCursor.active) {
@@ -2604,6 +2596,36 @@ FASTRUN void FlexIO2VGA::ISR(void) {
   }
 
   asm volatile("dsb");
+}
+void vgadump(uint8_t *memory, uint16_t len) {
+   	uint16_t	i=0, j=0;
+	unsigned char	c=0;
+
+//	printf("                     (FLASH) MEMORY CONTENTS");
+	Serial.printf("\n\rADDR          00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F");
+	Serial.printf("\n\r-------------------------------------------------------------\n\r");
+
+
+	for(i = 0; i <= (len-1); i+=16) {
+//		phex16((i + memory));
+		Serial.printf("%8.8x",(unsigned int)(i + memory));
+		Serial.printf("      ");
+		for(j = 0; j < 16; j++) {
+			c = memory[i+j];
+			Serial.printf("%2.2x",c);
+			Serial.printf(" ");
+		}
+		Serial.printf("  ");
+		for(j = 0; j < 16; j++) {
+			c = memory[i+j];
+			if(c > 31 && c < 127)
+				Serial.printf("%c",c);
+			else
+				Serial.printf(".");
+		}
+//		_delay_ms(10);
+		Serial.printf("\n");
+	}
 }
 
 /* END VGA driver code */

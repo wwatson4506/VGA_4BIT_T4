@@ -385,6 +385,9 @@ PROGMEM static const vga_timing t640x350x70 = {
 //***************************************************************
 #define STRIDE_PADDING 16
 #define SWAP(x,y) { (x)=(x)^(y); (y)=(x)^(y); (x)=(x)^(y); }
+
+void vgadump(uint8_t *memory, uint16_t len);  
+
 //***************************************************************
 // FlexIO2VGA class
 //***************************************************************
@@ -514,7 +517,7 @@ public:
   void scroll(int x, int y, int w, int h, int dx, int dy,int col);
   void drawText(int16_t x, int16_t y, const char * text, uint8_t fgcolor, uint8_t bgcolor);
   void drawText(int16_t x, int16_t y, const char * text, uint8_t fgcolor, uint8_t bgcolor, vga_text_direction dir);
-  int  fontLoad(const char *filename, bool src);
+  int  fontLoadMem(uint8_t *font);
   int  setFontSize(uint8_t fsize, bool runflag);  
   int  getFontWidth(void) { return font_width; }
   int  getFontHeight(void) { return font_height; }
@@ -557,7 +560,7 @@ public:
 
   void Vscroll(int x, int y, int w, int h, int dy ,int col);  //temporary for testing
   void Hscroll(int x, int y, int w, int h, int dx ,int col);  //temporary for testing
-  
+
 private:
   void set_clk(int num, int den);
   static void ISR(void);
