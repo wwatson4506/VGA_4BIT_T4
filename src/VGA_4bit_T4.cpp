@@ -1761,7 +1761,10 @@ FLASHMEM int FlexIO2VGA::setFontSize(uint8_t fsize, bool runflag) {
   promp_size = 0;
   print_window_h = fb_height / font_height;
   setBlkCursorDims(tCursor.x_start,tCursor.y_start,tCursor.x_end,font_height,0);
-  if(runflag == true) clear(background_color);
+  if(runflag == false) {
+	clearPrintWindow();
+    textxy(0,0);
+  }
   return (int)fsize;
 }
 
