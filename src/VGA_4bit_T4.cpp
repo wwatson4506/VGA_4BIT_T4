@@ -1761,7 +1761,10 @@ FLASHMEM int FlexIO2VGA::setFontSize(uint8_t fsize, bool runflag) {
   promp_size = 0;
   print_window_h = fb_height / font_height;
   setBlkCursorDims(tCursor.x_start,tCursor.y_start,tCursor.x_end,font_height,0);
-  if(runflag == true) clear(background_color);
+  if(runflag == false) {
+	clearPrintWindow();
+    textxy(0,0);
+  }
   return (int)fsize;
 }
 
@@ -1844,6 +1847,15 @@ FLASHMEM void FlexIO2VGA::drawText(int16_t x, int16_t y, const char * text, uint
 // x, y, width and height are in characters.
 //==========================================
 FLASHMEM void FlexIO2VGA::setPrintCWindow(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
+  tempX = cursor_x; // Save current cursor_x pos. unSetPrintWindow() uses these.
+  tempY = cursor_y; // Save current cursor_y pos. 
+  bool isActive = false; // Let's say cursor is not active for now.
+
+  // If text cursor is active, set flag true and turn off cursor.
+  if(tCursor.active) {
+    tCursorOff(); // Turn cursor off for now.
+    isActive = true; // Cursor was active. Flag true.
+  }
   if(x < 0) {
     print_window_x = 0;
   } else if(x >= ((fb_width / font_width) - font_width)) {
@@ -1863,6 +1875,26 @@ FLASHMEM void FlexIO2VGA::setPrintCWindow(uint8_t x, uint8_t y, uint8_t width, u
   print_window_w = width / (double_width ? 2:1);
   print_window_h = height / (double_height ? 2:1);
   textxy(0,0);
+
+  if(isActive) tCursorOn(); // Cursor was active, Turn it back on.
+}
+
+//=====================
+// Unset a text window.
+//=====================
+FLASHMEM void FlexIO2VGA::unsetPrintWindow() {
+  bool isActive = false; // Let's say cursor is not active for now.
+  // If text cursor is active, set flag and turn off cursor.
+  if(tCursor.active) {
+    tCursorOff(); // Turn cursor off for now.
+    isActive = true;
+  }
+  print_window_x = 0;
+  print_window_y = 0;
+  print_window_w = fb_width / font_width;
+  print_window_h = fb_height / font_height;
+  textxy(tempX,tempY); // Restore original cursor x,y positions.
+  if(isActive) tCursorOn(); // Cursor was active. Flag true.
 }
 
 //=========================================
@@ -1917,16 +1949,6 @@ FLASHMEM void FlexIO2VGA::clearPrintWindow() {
   getGptr(gCursor.gCursor_x,gCursor.gCursor_y,gCursor.char_under_cursor);
 }
 
-//=====================
-// Unset a text window.
-//=====================
-FLASHMEM void FlexIO2VGA::unsetPrintWindow() {
-  print_window_x = 0;
-  print_window_y = 0;
-  print_window_w = fb_width / font_width;
-  print_window_h = fb_height / font_height;
-}
-
 //=========================================
 // Scroll up text one row. (Slow!)
 // Set font_height to "-font_height" (negative)
@@ -1934,9 +1956,17 @@ FLASHMEM void FlexIO2VGA::unsetPrintWindow() {
 //=========================================
 FLASHMEM void FlexIO2VGA::scrollUpPrintWindow() {
   // move the 2nd row and the following ones one row up
+  bool isActive = false;
+  // If text cursor is active, set flag and turn off cursor.
+  if(tCursor.active) {
+    tCursorOff();
+    isActive = true;
+  }
+
   Vscroll(print_window_x, print_window_y + font_height, 
   (print_window_w) * font_width * (double_width ? 2:1), (print_window_h - 1) *
   font_height, -font_height, background_color);
+  if(isActive) tCursorOn();
 }
 
 //=========================================
@@ -1946,9 +1976,19 @@ FLASHMEM void FlexIO2VGA::scrollUpPrintWindow() {
 //=========================================
 FLASHMEM void FlexIO2VGA::scrollDownPrintWindow() {
   // move the 2nd line and the following ones one line down
+  bool isActive = false;
+
+  // If text cursor is active, set flag and turn off cursor.
+  if(tCursor.active) {
+    tCursorOff();
+    isActive = true;
+  }
+
   Vscroll(print_window_x, print_window_y, 
   (print_window_w) * font_width, (print_window_h - 1) * font_height,
   font_height, background_color);
+
+  if(isActive) tCursorOn();
 }
 
 //=============================================
@@ -1958,9 +1998,16 @@ FLASHMEM void FlexIO2VGA::scrollDownPrintWindow() {
 //=============================================
 FLASHMEM void FlexIO2VGA::scrollRightPrintWindow() {
   // move the 2nd column and the following ones one column right
+  bool isActive = false;
+  // If text cursor is active, set flag and turn off cursor.
+  if(tCursor.active) {
+    tCursorOff();
+    isActive = true;
+  }
   Hscroll(print_window_x, print_window_y,// + font_height,
   (print_window_w) * font_width, (print_window_h) * font_height,
   font_width, background_color);
+  if(isActive) tCursorOn();
 }
 
 //============================================
@@ -1970,9 +2017,16 @@ FLASHMEM void FlexIO2VGA::scrollRightPrintWindow() {
 //============================================
 FLASHMEM void FlexIO2VGA::scrollLeftPrintWindow() {
   // move the 2nd column and the following ones one column left
+  bool isActive = false;
+  // If text cursor is active, set flag and turn off cursor.
+  if(tCursor.active) {
+    tCursorOff();
+    isActive = true;
+  }
   Hscroll(print_window_x, print_window_y,// + font_height,
   (print_window_w) * font_width, (print_window_h) * font_height,
   -font_width, background_color);
+  if(isActive) tCursorOn();
 }
 
 //============================================

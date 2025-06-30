@@ -558,8 +558,8 @@ public:
   bool buttonJustPressed(struct Gbuttons *buttons);
   bool buttonJustReleased(struct Gbuttons *buttons);
 
-  void Vscroll(int x, int y, int w, int h, int dy ,int col);  //temporary for testing
-  void Hscroll(int x, int y, int w, int h, int dx ,int col);  //temporary for testing
+//  void Vscroll(int x, int y, int w, int h, int dy ,int col);  //temporary for testing
+//  void Hscroll(int x, int y, int w, int h, int dx ,int col);  //temporary for testing
 
 private:
   void set_clk(int num, int den);
@@ -575,8 +575,8 @@ private:
   inline void drawLinex(int x0, int y0, int x1, int y1, int color) {
     drawLine(x0, y0, x1, y1, color, true);
   }
-//  inline void Vscroll(int x, int y, int w, int h, int dy ,int col);
-//  inline void Hscroll(int x, int y, int w, int h, int dx ,int col);
+  inline void Vscroll(int x, int y, int w, int h, int dy ,int col);
+  inline void Hscroll(int x, int y, int w, int h, int dx ,int col);
 
   // Private variables
   uint8_t foreground_color;
@@ -604,6 +604,9 @@ private:
   int bpp;
 
   bool initialized = false;
+  // These are use in setPrintCWindow() and unSetPrintWindow().
+  uint16_t tempX = 0;
+  uint16_t tempY = 0;
   
   uint8_t *_fb = NULL;
   volatile unsigned int frameCount;
