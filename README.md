@@ -103,6 +103,9 @@ All files are heavily commented.
 - Loadable_Font_Demo.ino -- see the above requirements for this sketch. (Requirements also noted in the sketch). One define in sketch is used to switch between SD card or USB drive usage.
 - Updated source files for loadable fonts
 
+### Fixes for src files: 06-30-25
+- VGA_4Bit_T4.cpp -- Fixed issues with text cursor positioning when setting a text print window. Fixed phantom text cursor appearing randomly when scrolling in any direction.
+- VGA_4Bit_T4.h -- Added to private variables for fixes above.
 ### TODO:
 - Filled ellipses have a problem with filling out of bounds with certain parameter combinations have not figured out why yet. Example of fail: fillEllipse(516, 419,59,61,VGA_BRIGHT_WHITE). Resolution does not matter.
 
