@@ -1862,6 +1862,7 @@ FLASHMEM void FlexIO2VGA::setPrintCWindow(uint8_t x, uint8_t y, uint8_t width, u
 
   print_window_w = width / (double_width ? 2:1);
   print_window_h = height / (double_height ? 2:1);
+  textxy(0,0);
 }
 
 //=========================================
