@@ -452,8 +452,8 @@ FLASHMEM void FlexIO2VGA::clear(uint8_t fg) {
       _fb[y*_pitch+x] = c;
     }
   }
-  getChar(tCursorX(),tCursorY(),tCursor.char_under_cursor);
-  getGptr(gCursor.gCursor_x,gCursor.gCursor_y,gCursor.char_under_cursor);
+//  getChar(tCursorX(),tCursorY(),tCursor.char_under_cursor);
+//  getGptr(gCursor.gCursor_x,gCursor.gCursor_y,gCursor.char_under_cursor);
 }
 
 //===================================
