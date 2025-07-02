@@ -2054,9 +2054,10 @@ FLASHMEM void FlexIO2VGA::drawTcursor(int color) {
 //=========================================
 FLASHMEM void FlexIO2VGA::textxy(int column, int line) {
   bool isActive = false;
-  if(tCursor.active) isActive = true;
-  getChar(tCursorX(),tCursorY(),tCursor.char_under_cursor);
-  tCursorOff();
+  if(tCursor.active) {
+    isActive = true;
+    tCursorOff();
+  }
   if(column < 0)
     cursor_x = 0;
   else if(column >= print_window_w)
