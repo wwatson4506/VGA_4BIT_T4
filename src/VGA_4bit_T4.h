@@ -241,13 +241,13 @@ const float calcco[360]={
 
 // Text cursor struct.
 typedef struct {
-  bool    active = false;  // Cursor on/off.
-  int16_t tCursor_x;       // Pixel based.
-  int16_t tCursor_y;       // Pixel based.
+  bool     active = false;  // Cursor on/off.
+  int16_t  tCursor_x;       // Pixel based.
+  int16_t  tCursor_y;       // Pixel based.
   uint8_t  char_under_cursor[256]; // Char save array.
   bool     blink;           // Blink enable. True = blink.
   uint32_t blink_rate;	
-  bool     toggle;          // Cursor blink togggle.
+  bool     toggle;          // Cursor blink toggle. (true == cursor showing)
   uint8_t  x_start;         // Cursor x start (0-7).
   uint8_t  y_start;         // Cursor y start (0-15).
   uint8_t  x_end;           // Cursor y end (0-7).
@@ -557,10 +557,7 @@ public:
   bool buttonIsPressed(struct Gbuttons *buttons);
   bool buttonJustPressed(struct Gbuttons *buttons);
   bool buttonJustReleased(struct Gbuttons *buttons);
-
-//  void Vscroll(int x, int y, int w, int h, int dy ,int col);  //temporary for testing
-//  void Hscroll(int x, int y, int w, int h, int dx ,int col);  //temporary for testing
-
+  
 private:
   void set_clk(int num, int den);
   static void ISR(void);

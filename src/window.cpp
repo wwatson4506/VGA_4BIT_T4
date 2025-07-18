@@ -76,28 +76,42 @@ int titleWindow(int winNum, uint8_t titleColor, const char *title) {
 int openWindow(int winNum) {
   uint8_t centerText = getCenteredTextX((windows[winNum].x2-1)-(windows[winNum].x1+1),windows[winNum].winTitle);  
   uint8_t tempBGC = 0;
+  uint8_t xoffset = 0;
+  uint8_t yoffset = 0;
   
-  if(windows[winNum].handle >= 0) return -1; // Error: Window is active.
-
+  if(windows[winNum].handle >= 0) return -1; // Error: Window is already open.
   windows[winNum].handle = winNum;
+
+  if(windows[winNum].shadowEnable == true) {
+	xoffset = RIGHT_BORDER + SHADOW;
+    yoffset = TOP_BORDERS + SHADOW;
+  } else {
+    xoffset = RIGHT_BORDER;	  
+    yoffset = TOP_BORDERS;
+  }
+
   windows[winNum].winbuf = vbox_get(windows[winNum].y1,windows[winNum].x1,
-                                    windows[winNum].y2+4,windows[winNum].x2+2);
+                                    windows[winNum].y2+yoffset,windows[winNum].x2+xoffset);
 
   vga4bit.setBackgroundColor(windows[winNum].bgc);
+
   box_erase(windows[winNum].y1,windows[winNum].x1,
             windows[winNum].y2+3,windows[winNum].x2+1);
   
+  // Draw frame around window (single/double) line(s).
   vga4bit.setForegroundColor(windows[winNum].frameColor);
   box_draw(windows[winNum].y1,windows[winNum].x1,windows[winNum].y2+3,
            windows[winNum].x2+1,windows[winNum].frameType);
   box_draw(windows[winNum].y1,windows[winNum].x1,windows[winNum].y1+2,
            windows[winNum].x2+1,windows[winNum].frameType);
 
+  // Draw frame around window (single/double) line(s) corners.
   vga4bit.textxy(windows[winNum].x1,windows[winNum].y1+2);
   (windows[winNum].frameType == SINGLE_LINE) ? vga4bit.write(195) : vga4bit.write(204);
   vga4bit.textxy(windows[winNum].x2+1,windows[winNum].y1+2);
   (windows[winNum].frameType == SINGLE_LINE) ? vga4bit.write(180) : vga4bit.write(185);
 
+  // Do window shadow
   if(windows[winNum].shadowEnable) {
     tempBGC = vga4bit.getBGC();
     vga4bit.setBackgroundColor(windows[winNum].shadowBGColor);
@@ -109,15 +123,19 @@ int openWindow(int winNum) {
     vga4bit.setBackgroundColor(tempBGC);
   }
   
+  // Draw window title (centered).
   vga4bit.setForegroundColor(windows[winNum].titleColor);
   vga4bit.textxy((windows[winNum].x1+1)+centerText,windows[winNum].y1+1);
   vga4bit.printf("%s",windows[winNum].winTitle);
 
+  // Init the rest of the window structure parameters. Mark window as open.
   vga4bit.setForegroundColor(windows[winNum].fgc);
   vga4bit.setBackgroundColor(windows[winNum].bgc);
-
+  vga4bit.textxy(0,0);
+  windows[winNum].save_x = 0;
+  windows[winNum].save_y = 0;
   windows[winNum].isOpen = true;
-
+//  if(getActiveWin() < 0) windows[winNum].active = true; // Usually window 0
   return windows[winNum].handle; // Return handle.
 }
 
@@ -135,24 +153,42 @@ int getActiveWin(void) {
   for(int i = 0; i <= MAXWINDOWS; i++) {
     if(windows[i].active == true) return i;
   }
-  return 0; // Default to 0. No open windows.
+  return -1; // Default to 0. No active windows.
+}
+
+//===============================================================
+// Only one open window at a time. Return true if window is open.
+//===============================================================
+bool winIsOpen(int winNum) {
+  if(windows[winNum].isOpen == true) return true; else return false;
 }
 
 //================================================================
 // Select an open window. Return -1 if not open or active window.
 //================================================================
 int selectWindow(int winNum) {
+  if(!windows[winNum].isOpen || (winNum > MAXWINDOWS))
+    return -1; // Window is not open or invalid window number.
+
+  int actv = getActiveWin(); // Get current active open window handle.
+
   vga4bit.setForegroundColor(windows[winNum].fgc);
   vga4bit.setBackgroundColor(windows[winNum].bgc);
 
-  int actv = getActiveWin();
-  windows[actv].active = false;
-  windows[winNum].active = true;
+  if(actv >= 0) { // There is a previously selected window. 
+    save_xy(actv); // Save current x,y coordinates for later reselection.
+    windows[actv].active = false; // De-select current window.
+  }
+
+  windows[winNum].active = true; // Mark selected window active.
   vga4bit.setPrintCWindow(windows[winNum].x1+1,windows[winNum].y1+3, //+4,
                           windows[winNum].x2-windows[winNum].x1,
                           windows[winNum].y2-windows[winNum].y1);
-  windows[winNum].active = true;
 
+  // Set window as selected.
+  windows[winNum].active = true;
+  // Set cursor to windows save coordinates.
+  vga4bit.textxy(windows[winNum].save_x,windows[winNum].save_y);
   return windows[winNum].handle; // Return active handle.
 }
 
@@ -160,6 +196,7 @@ int selectWindow(int winNum) {
 // Close an open window
 //============================================================
 int windowClose(int winNum) {
+
   if(windows[winNum].handle < 0) return -1; // Error: window is not open.
   vbox_put(windows[winNum].winbuf);
   windows[winNum].handle = -1;
@@ -179,5 +216,20 @@ int clearWindow(int winNum) {
   box_erase(0, 0, windows[winNum].y2, windows[winNum].x2);
   vga4bit.textxy(0,0); // Home cursor.
   selectWindow(actv);
+  return 0;
+}
+
+int save_xy(int winNum) {
+
+  if(vga4bit.tCursorX() > 0) {
+    windows[winNum].save_x = vga4bit.tCursorX() - windows[winNum].x1 - LEFT_BORDER;
+  } else {
+    windows[winNum].save_x = 0;
+  }
+  if(vga4bit.tCursorY() > 0) {
+    windows[winNum].save_y = vga4bit.tCursorY() - windows[winNum].y1 - TOP_BORDERS;
+  } else {
+    windows[winNum].save_y = 0;
+  }
   return 0;
 }

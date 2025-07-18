@@ -58,19 +58,24 @@
  * HSYNC (35) <---------------68R---------------------------> VGA PIN 13 - T4 pin 35
  */
 
-// Frame buffer configurations. Un-comment one at a time.
-DMAMEM uint8_t frameBuffer0[(MAX_HEIGHT+1)*(MAX_WIDTH+STRIDE_PADDING)];
-//uint8_t frameBuffer0[(MAX_HEIGHT+1)*(MAX_WIDTH+STRIDE_PADDING)];
-//EXTMEM uint8_t frameBuffer0[(MAX_HEIGHT+1)*(MAX_WIDTH+STRIDE_PADDING)];
-//static uint8_t frameBuffer1[(MAX_HEIGHT+1)*(MAX_WIDTH+STRIDE_PADDING)];
-
-static uint8_t* const s_frameBuffer[1] = {frameBuffer0};
 
 static uint32_t frameBufferIndex = 0;
 static int fb_width;
 static int fb_height;
 static size_t _pitch;  
 uint8_t currentFont[256*16] DMAMEM;
+
+// Frame buffer configurations. Un-comment one at a time.
+//DMAMEM uint8_t frameBuffer0[(MAX_HEIGHT+1)*(MAX_WIDTH+STRIDE_PADDING)];
+
+DMAMEM uint8_t frameBuffer0[(MAX_HEIGHT+1)*(MAX_WIDTH+STRIDE_PADDING)];
+
+//static uint8_t frameBuffer0[(MAX_HEIGHT+1)*(MAX_WIDTH+STRIDE_PADDING)];
+//EXTMEM uint8_t frameBuffer0[(MAX_HEIGHT+1)*(MAX_WIDTH+STRIDE_PADDING)];
+//static uint8_t frameBuffer1[(MAX_HEIGHT+1)*(MAX_WIDTH+STRIDE_PADDING)];
+
+static uint8_t* const s_frameBuffer[1] = {frameBuffer0};
+
 text_cursor tCursor;
 graphic_cursor gCursor;
 
@@ -91,6 +96,8 @@ PolyDef_t PolySet;  // will contain a polygon data
 //         (only 4 bit pixels spported at this time) 
 //===============================================
 FLASHMEM void FlexIO2VGA::begin(const vga_timing& mode, bool half_width, bool half_height, unsigned int bpp) {
+
+
   frameCount = 0;
   IOMUXC_SW_MUX_CTL_PAD_GPIO_B0_02 = 4; // FLEXIO2_D2    RED
   IOMUXC_SW_MUX_CTL_PAD_GPIO_B0_01 = 4; // FLEXIO2_D1    GREEN
@@ -339,7 +346,6 @@ void FlexIO2VGA::TimerInterrupt(void) {
         }
       }
     } else {
-
       drawTcursor(tCursor.color);
     }
   }
@@ -1847,9 +1853,11 @@ FLASHMEM void FlexIO2VGA::drawText(int16_t x, int16_t y, const char * text, uint
 // x, y, width and height are in characters.
 //==========================================
 FLASHMEM void FlexIO2VGA::setPrintCWindow(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
-  tempX = cursor_x; // Save current cursor_x pos. unSetPrintWindow() uses these.
-  tempY = cursor_y; // Save current cursor_y pos. 
   bool isActive = false; // Let's say cursor is not active for now.
+
+  // unSetPrintWindow() uses these.
+  tempX = cursor_x; // Save current cursor_x pos.
+  tempY = cursor_y; // Save current cursor_y pos. 
 
   // If text cursor is active, set flag true and turn off cursor.
   if(tCursor.active) {
@@ -1858,7 +1866,7 @@ FLASHMEM void FlexIO2VGA::setPrintCWindow(uint8_t x, uint8_t y, uint8_t width, u
   }
   if(x < 0) {
     print_window_x = 0;
-  } else if(x >= ((fb_width / font_width) - font_width)) {
+  } else if(x >= ((fb_width / font_width))) {// - font_width)) {
     print_window_x = (fb_width / font_width);
   } else {
     print_window_x = (x * font_width);
@@ -1866,7 +1874,7 @@ FLASHMEM void FlexIO2VGA::setPrintCWindow(uint8_t x, uint8_t y, uint8_t width, u
   
   if(y < 0) {
     print_window_y = 0;
-  } else if(y >= ((fb_height / font_height) - font_height)) {
+  } else if(y >= ((fb_height / font_height))) {// - font_height)) {
     print_window_y = (fb_height / font_height);
   } else {
     print_window_y = (y *font_height);
@@ -1917,7 +1925,7 @@ FLASHMEM void FlexIO2VGA::setPrintWindow(int x, int y, int width, int height) {
   if(width < font_width) width = font_width;
   if(height < font_height) height = font_height;
   print_window_w = (width / font_width) / (double_width ? 2:1);
-  print_window_h = height / font_height / (double_height ? 2:1);
+  print_window_h = (height / font_height) / (double_height ? 2:1);
 }
 
 //==================================================
@@ -2055,7 +2063,7 @@ FLASHMEM void FlexIO2VGA::drawTcursor(int color) {
 FLASHMEM void FlexIO2VGA::textxy(int column, int line) {
   bool isActive = false;
   if(tCursor.active) {
-    isActive = true;
+	isActive = true;
     tCursorOff();
   }
   if(column < 0)
