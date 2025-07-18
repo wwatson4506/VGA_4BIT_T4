@@ -57,7 +57,7 @@ There a few examples of usage including a graphic cursor as well as a simple scr
 
 - VGA_T4_GraphicCursor -- An example of a software driven graphic cursor. Requires a USB mouse connected to the T4.1 USB host connector. There are four types of graphic cursors available (Block, Filled Arrow, Hollow Arrow and I-beam). This uses the "drawBitmap()" function to render the cursor. More could be added. Uses 8x16 bitmap.
 
-- Grahics -- Demonstrates some of the graphic primitives like drawing circles, filled circles, triangles, filled triangles, rectangles, filled rectangles, ellipses and filled ellipses. 
+- Graphics -- Demonstrates some of the graphic primitives like drawing circles, filled circles, triangles, filled triangles, rectangles, filled rectangles, ellipses and filled ellipses. 
 
 - VGA_T4_Mandelbrot -- A uVGA example adapted to VGA_4BIT_T4.
 
@@ -65,7 +65,7 @@ There a few examples of usage including a graphic cursor as well as a simple scr
 
 - VGA_T4_Box_Test -- Demonstrates allocating memory for saving and recalling sections of video memory. Basis for windowing functions.
 
-- VGA_T4_Windows_Test -- A very simple windowing system.
+- VGA_T4_Windows_Test -- A very simple windowing system (moved to "windows_examples" folder).
 
 - Double_Size_Font_Test.ino -- Demonstrates screen double width and double height font modes.
 
@@ -74,6 +74,8 @@ There a few examples of usage including a graphic cursor as well as a simple scr
 - VGA_T4_Text.ino -- Displays a couple of text screens repeatedly.
 
 - Loadable_Font_Demo.ino -- To use this sketch you will need to copy the four '.fnt' files found in the same directory as this sketch to an SD card or a USB drive. The file names are "bold.fnt", " italics.fnt", "" standard.fnt", " thin.fnt". The font files are 4096 bytes in size and represent 256x16 font array. One define in sketch is used to switch between SD card or USB drive usage.
+
+- Added four more windowing examples to thwe "windows_examples" folder. (07-17-25)
 
 Filled ellipses have a problem with filling out of bounds with certain parameter combinations have not figured out why yet. Example of fail: fillEllipse(516, 419,59,61,VGA_BRIGHT_WHITE). Resolution does not matter.- More to come MAYBE...
 
@@ -103,9 +105,19 @@ All files are heavily commented.
 - Loadable_Font_Demo.ino -- see the above requirements for this sketch. (Requirements also noted in the sketch). One define in sketch is used to switch between SD card or USB drive usage.
 - Updated source files for loadable fonts
 
+### Added sketches: 07-17-25
+- 800x600_Screen_8x8_font_4_windows.ino -- Demonstrates window selecting on multiple windows of varying sizes.
+- 800x600_Screen_8x16_font_4_windows.ino -- Demonstrates window selecting on multiple windows of varying sizes.
+- 1024x786_Screen_8x8_font_4_windows.ino -- Demonstrates window selecting on multiple windows of varying sizes.
+- 1024x786_Screen_8x16_font_4_windows.ino -- Demonstrates window selecting on multiple windows of varying sizes.
+
 ### Fixes for src files: 06-30-25
 - VGA_4Bit_T4.cpp -- Fixed issues with text cursor positioning when setting a text print window. Fixed phantom text cursor appearing randomly when scrolling in any direction.
 - VGA_4Bit_T4.h -- Added to private variables for fixes above.
+
+### Fixes for src files: 06-30-25
+- Major rework on "windows.cpp" and "VGA_4bit_T4.cpp". Lots of fixes and improvements.
+
 ### TODO:
 - Filled ellipses have a problem with filling out of bounds with certain parameter combinations have not figured out why yet. Example of fail: fillEllipse(516, 419,59,61,VGA_BRIGHT_WHITE). Resolution does not matter.
 
