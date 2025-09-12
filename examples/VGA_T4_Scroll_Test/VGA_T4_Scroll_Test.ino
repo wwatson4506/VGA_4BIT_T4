@@ -15,7 +15,6 @@ const vga_timing *timing = &t640x480x60;
 
 // Must use this instance name (vga4bit). It is used in the driver.
 FlexIO2VGA vga4bit;
-//static int fb_width, fb_height;
 
 int i=0;
 

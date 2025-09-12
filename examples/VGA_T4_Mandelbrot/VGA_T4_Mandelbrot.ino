@@ -11,7 +11,7 @@ const byte cmap[] =
 	0b00000000
 };
 
-int fb_width, fb_height;
+uint16_t fbWidth, fbHeight;
 
 // Uncomment one of the following screen resolutions. Try them all:)
 //const vga_timing *timing = &t1024x768x60;
@@ -31,7 +31,7 @@ void setup() {
   //                    Color Depth   = 4 bits
   vga4bit.begin(*timing, false, false, 4);
   // Get display dimensions
-  vga4bit.getFbSize(&fb_width, &fb_height);
+  vga4bit.getFbSize(&fbWidth, &fbHeight);
   // Clear graphic screen
   vga4bit.clear(VGA_BLUE);
 }
@@ -44,10 +44,10 @@ void loop() {
   int iteration;
 
 
-  for (row = 0; row < fb_height; row++) {
-    for (col = 0; col < fb_width; col++) {
-      c_re = (col - fb_width / 1.5) * 4.0 / fb_width;
-      c_im = (row - fb_height / 2.0) * 4.0 / fb_width;
+  for (row = 0; row < fbHeight; row++) {
+    for (col = 0; col < fbWidth; col++) {
+      c_re = (col - fbWidth / 1.5) * 4.0 / fbWidth;
+      c_im = (row - fbHeight / 2.0) * 4.0 / fbWidth;
       x = 0;
       y = 0;
       iteration = 0;

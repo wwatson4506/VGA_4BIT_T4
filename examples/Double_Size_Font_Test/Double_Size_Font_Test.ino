@@ -1,3 +1,24 @@
+// Double_Size_Font_test.ino
+
+//**********************************************************************
+// NOTE: This sketch must have dimensions 1024x768 set in 'VGA_T4_Config.h'.
+//       Uncomment MAX_WIDTH and MAX_HEIGHT like this:
+//
+//         #define MAX_WIDTH (1024/2)
+//         #define MAX_HEIGHT 768
+//
+//         //#define MAX_WIDTH (800/2)
+//         //#define MAX_HEIGHT 600
+//
+//         //#define MAX_WIDTH (640/2)
+//         //#define MAX_HEIGHT 480
+//
+//         //#define MAX_WIDTH (640/2)
+//         //#define MAX_HEIGHT 400
+//**********************************************************************
+//       Leave the rest commented out!!
+//**********************************************************************
+
 #include "VGA_4bit_T4.h"
 
 const vga_timing *timing4 = &t1024x768x60;
@@ -7,7 +28,7 @@ const vga_timing *timing1 = &t640x400x70;
 
 // Must use this instance name. It's used in the driver.
 FlexIO2VGA vga4bit;
-static int fb_width, fb_height;
+uint16_t fbWidth, fbHeight;
 
 #define FONTSIZE 16
 int i = 0;
@@ -25,7 +46,7 @@ void setup() {
   vga4bit.begin(*timing1, false, false, 4); // Default.
 
   // Get display dimensions
-  vga4bit.getFbSize(&fb_width, &fb_height);
+  vga4bit.getFbSize(&fbWidth, &fbHeight);
 
   // Set fontsize 8x8 or (8x16 available)
   vga4bit.setFontSize(FONTSIZE,false);

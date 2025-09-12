@@ -27,44 +27,22 @@
 
 #include "USBHost_t36.h"
 #include "VGA_4bit_T4.h"
+#include "USBmouseVGA.h"
 
-#define FONTSIZE 8 // 8 = 8x8 font or 16 = 8x16 font.
+#define FONTSIZE 16 // 8 = 8x8 font or 16 = 8x16 font.
 
 // Must use this instance name (vga4bit). It is used in the driver.
 FlexIO2VGA vga4bit;
-static int fb_width, fb_height; // Frame Buffer size vars.
+uint16_t fbWidth, fbHeight; // Frame Buffer size vars.
 
 USBHost myusb;
 USBHub hub1(myusb);
 USBHub hub2(myusb);
-//USBHub hub3(myusb);
-//USBHub hub4(myusb);
-
-MouseController mouse1(myusb);
-KeyboardController keyboard1(myusb); // Not used.
 USBHIDParser hid1(myusb); // Needed for USB mouse.
 USBHIDParser hid2(myusb); // Needed for USB wireless keyboard/mouse combo.
 
-// A structure to hold results of mouse operations.
-// Some are not used in this sketch.
-struct usbMouseMsg_struct {
-	uint8_t buttons;
-	uint8_t snglClickCnt;
-	uint8_t dblClickCnt;
-	uint8_t clickCount;
-	int8_t mousex;
-	int8_t mousey;
-	int16_t scaledX;
-	int16_t scaledY;
-	int8_t wheel;
-	int8_t wheelH;
-	int16_t mouseXpos;
-	int16_t mouseYpos;
-	boolean mouseEvent;
-};
-
 // An working mouse message object.
-usbMouseMsg_struct mouse_msg;
+usbMouseMsg *mouse_mesg = getMouseMsgPointer();
 
 // Array of vga4bit basic colors
 const uint8_t myColors[] = {
@@ -85,25 +63,6 @@ const uint8_t myColors[] = {
   VGA_BRIGHT_YELLOW,  // 14
   VGA_BRIGHT_WHITE    // 15
 };
-
-// global Variables for scaleMouseXY.
-int16_t fine_dx = 0;
-int16_t fine_dy = 0;
-int16_t event_dx = 0;
-int16_t event_dy = 0;
-int16_t nevent_dx = 0;
-int16_t nevent_dy = 0;
-
-// Adjustable parameters for mouse cursor movement.
-int16_t delta  = 127;
-int16_t accel  = 5;
-int16_t scaleX = 2;
-int16_t scaleY = 2;
-
-// Counters for single and doubble clicks.
-uint8_t scCount = 0;
-uint8_t dcCount = 0;
-
 // Uncomment one of the following screen resolutions. Try them all:)
 //const vga_timing *timing = &t1024x768x60;
 //const vga_timing *timing = &t800x600x60;
@@ -117,9 +76,13 @@ void setup() {
   //   double Height = false
   //   double Width  = false
   //   Color Depth   = 4 bits
+
+Serial.printf("%c\n",12);
+if(CrashReport) Serial.println(CrashReport);
+
   vga4bit.begin(*timing, false, false, 4);
   // Get display dimensions
-  vga4bit.getFbSize(&fb_width, &fb_height);
+  vga4bit.getFbSize(&fbWidth, &fbHeight);
   // Set fontsize 8x16 or (8x8 available)
   vga4bit.setFontSize(FONTSIZE, false);
   // Set default foreground and background colors
@@ -127,18 +90,19 @@ void setup() {
   vga4bit.setForegroundColor(VGA_BRIGHT_GREEN);
   // Clear screen to background color
   vga4bit.clear(VGA_BLACK);
-  // Startup USBHost
-  myusb.begin();
+
+  // Startup USBHost and mouse driver.
+  mouse_init();
   // Set mouse cursor position to center of screen.
-  mouse_msg.scaledX = fb_width/2;
-  mouse_msg.scaledY = fb_height/2;
+  mouse_mesg->scaledX = fbWidth/2;
+  mouse_mesg->scaledY = fbHeight/2;
   // Move text cursor to home position
   vga4bit.textxy(0,0);
   // Print a title.
   vga4bit.println("********** USB Mouse and Graphic Cursor Example **********");
   // Draw a centered white filled rectangle.
-  vga4bit.fillRect(fb_width/4,fb_height/4,(fb_width/2)+(fb_width/4),
-                  (fb_height/2)+(fb_height/4),VGA_BLUE);
+  vga4bit.fillRect(fbWidth/4,fbHeight/4,(fbWidth/2)+(fbWidth/4),
+                  (fbHeight/2)+(fbHeight/4),VGA_BLUE);
   // Init graphic cursor:
   // initGcursor(Cursor Type, Cursor x start, Cursor y start, Cursor x end, Cursor y end) 
   // Cursor type:
@@ -160,111 +124,13 @@ void loop() {
   myusb.Task();
   if(mouseEvent()) { // Wait for a mouse event.
     // Set mouse cursor position.
-    vga4bit.printf("Mouse X: %4.4d\n", mouse_msg.scaledX);
-    vga4bit.printf("Mouse Y: %4.4d\n", mouse_msg.scaledY);
+    vga4bit.printf("Mouse X: %4.4d\n", mouse_mesg->scaledX);
+    vga4bit.printf("Mouse Y: %4.4d\n", mouse_mesg->scaledY);
     vga4bit.printf("Buttons: %d\n", getMouseButtons());
-    vga4bit.printf("Wheel: %2d\n", mouse_msg.wheel);
-    vga4bit.printf("WheelH: %2d\n", mouse_msg.wheelH);
-    vga4bit.moveGcursor(mouse_msg.scaledX, mouse_msg.scaledY); 
-/*
-    checkMouseClicks(); // Check for mouse button use.  // ***** This method is blocking, DISABLED for now!! *****
-	scCount += getSnglClick(); // Add to Single Click Count.
-	dcCount += getDblClick(); // Add to Double Click Count.
-    vga4bit.printf("Single Clicks: %d\n", scCount);
-    vga4bit.printf("Double Clicks: %d\n", dcCount);
-*/
+    vga4bit.printf("Wheel: %2d\n", mouse_mesg->wheel);
+    vga4bit.printf("WheelH: %2d\n", mouse_mesg->wheelH);
+    vga4bit.moveGcursor(mouse_mesg->scaledX, mouse_mesg->scaledY); 
 	vga4bit.textxy(0,2); // Set print position.
-    mouse1.mouseDataClear();
+    mouseDataClear();
   }
-}
-
-// Scale mouse XY to fit our screen.
-void scaleMouseXY(void) {
-  nevent_dx = (int16_t)mouse1.getMouseX();
-  nevent_dy = (int16_t)mouse1.getMouseY();
-  if(abs(nevent_dx) + abs(nevent_dy) > delta) {
-    nevent_dx *= accel;
-    nevent_dy *= accel;
-  }
-  event_dx += nevent_dx;
-  event_dy += nevent_dy;
-  fine_dx += event_dx; 
-  fine_dy += event_dy; 
-  event_dx = fine_dx / scaleX;
-  event_dy = fine_dy / scaleY;
-  fine_dx %= scaleX;
-  fine_dy %= scaleY;
-  mouse_msg.scaledX += event_dx;
-  mouse_msg.scaledY += event_dy;
-  // Clip to display dimensions.
-  if(mouse_msg.scaledX < 0) mouse_msg.scaledX = 0;
-  if(mouse_msg.scaledX > (uint16_t)fb_width-1) mouse_msg.scaledX = (uint16_t)fb_width-1;
-  if(mouse_msg.scaledY < 0)	mouse_msg.scaledY = 0;
-  if(mouse_msg.scaledY > (uint16_t)fb_height-1)	mouse_msg.scaledY = (uint16_t)fb_height-1;
-}
-
-// Check for a mouse Event
-bool mouseEvent(void) {
-	if(!mouse1.available())	return false;
-	mouse_msg.wheel = (int8_t)mouse1.getWheel(); // Check for wheel movement
-	mouse_msg.wheelH = (int8_t)mouse1.getWheelH();
-	scaleMouseXY();
-	return true;
-}
-
-// Check for mouse button presses
-uint8_t getMouseButtons(void) {
-	mouse_msg.buttons = (uint8_t)mouse1.getButtons();
-	return mouse_msg.buttons;
-}
-
-// ***************************************************
-// * This function is not right. Disabled for now!!! *
-// ***************************************************
-// A simple routine to detect for mouse button double clicks.
-// Single clicks will also be recorded even if a double click is
-// detected but can be ignored if needed. 
-void checkMouseClicks(void) {
-  uint8_t clickCount = 0;
-  uint32_t timerStart = 0;
-  uint32_t timeOut = 375; // Set this for double click timeout
-  bool getOut = false;
-
-  while(!getOut) {
-    // Check for Left mouse button double click.
-    if((getMouseButtons() & 1) == 1) {
-      if(clickCount == 0) {
-        mouse_msg.snglClickCnt++; // Single click detected
-        timerStart = millis();
-      }
-      clickCount++;
-      if(clickCount >= 2) { // No more than two clicks counts				
-        clickCount = 0; 
-        mouse_msg.dblClickCnt++; // Double click detected
-        getOut = true; // All done. Exit
-      }
-      while(((getMouseButtons() & 1) != 0)) {  // Wait for button release. This is blocking!!!
-        delay(0); // ?
-      }
-    }
-    delay(0); // ?
-    if(((millis()-timerStart) > timeOut) || (getOut == true))
-      break; // Nothing happened getOut
-  }
-}
-
-// Check for a double left mouse button click
-uint8_t getDblClick(void) {
-	uint8_t dClick = mouse_msg.dblClickCnt;
-	if(dClick > 0)
-		mouse_msg.dblClickCnt = 0;
-	return dClick;
-}
-
-// Check for a single left mouse button click
-uint8_t getSnglClick(void) {
-	uint8_t sClick = mouse_msg.snglClickCnt;
-	if(sClick > 0)
-		mouse_msg.snglClickCnt = 0;
-	return sClick;
 }

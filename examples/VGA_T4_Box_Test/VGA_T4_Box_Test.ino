@@ -1,5 +1,25 @@
 // VGA_T4_Box_Test.ino
 
+//**********************************************************************
+// NOTE: This sketch will hang due to insufficient memory if the screen
+//       dimensions are set to 1024x768 in 'VGA_T4_Config.h'.
+//       This will fail:
+//
+//         #define MAX_WIDTH (1024/2)
+//         #define MAX_HEIGHT 768
+//
+//         //#define MAX_WIDTH (800/2)
+//         //#define MAX_HEIGHT 600
+//
+//       This and anything less works:
+//
+//         //#define MAX_WIDTH (1024/2)
+//         //#define MAX_HEIGHT 768
+//
+//         #define MAX_WIDTH (800/2)
+//         #define MAX_HEIGHT 600
+//**********************************************************************
+
 #include "VGA_4bit_T4.h"
 #include "box.h"
 
@@ -57,9 +77,8 @@ void setup() {
   // Clear screen to background color
   vga4bit.clear(VGA_BLACK);
 
-  box_charfill(1, 1, 23, vga4bit.getTwidth()-1, 176);
-  buf1 = vbox_get(5, 5, 15, 40);
-  buf2 = vbox_get(1, 1, 22, vga4bit.getTwidth()-1);
+  box_charfill(0, 0, 23, vga4bit.getTwidth(), 178);
+  buf1 = vbox_get(5, 5, 16, 42);
 
   vga4bit.setForegroundColor(VGA_BRIGHT_GREEN);
   vga4bit.setBackgroundColor(VGA_BLUE);
@@ -67,13 +86,15 @@ void setup() {
   box_erase(5, 5, 15, 40);
   box_draw(7, 5, 7, 40, 1);
   box_draw(5, 5, 15, 40, 2);
-
+  
   vga4bit.textxy(9, 11);
   vga4bit.printf("Press any key to continue...");
 
   waitforInput();
   vbox_put(buf1);
   free(buf1);
+
+  buf2 = vbox_get(0, 0, 22, vga4bit.getTwidth());
 
   vga4bit.setForegroundColor(VGA_BRIGHT_WHITE);
   vga4bit.setBackgroundColor(VGA_BLACK);

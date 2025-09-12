@@ -14,6 +14,17 @@ USBHub hub2(myusb);
 //USBHub hub3(myusb);
 //USBHub hub4(myusb);
 
+//**********************************************************************
+// The folowing two lines must be included in the main sketch when using
+// the USB keyboard or USB mouse even if using just one of the two:
+//
+//     USBHIDParser hid1(myusb);
+//     USBHIDParser hid2(myusb);
+//**********************************************************************
+
+USBHIDParser hid1(myusb);
+USBHIDParser hid2(myusb);
+
 #ifdef USE_USB_DRIVE
 // Setup MSC for the number of USB Drives you are using. (one for this
 // example). Mutiple  USB drives can be used. Hot plugging is supported.

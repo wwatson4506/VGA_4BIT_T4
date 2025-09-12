@@ -24,7 +24,6 @@ const vga_timing *timing = &t640x400x70;
 
 // Must use this instance name (vga4bit). It is used in the driver.
 FlexIO2VGA vga4bit;
-//static int fb_width, fb_height;
 
 // Array of vga4bit Basic Colors
 const uint8_t myColors[] = {

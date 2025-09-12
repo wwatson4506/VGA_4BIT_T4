@@ -10,14 +10,15 @@
 #define FONTSIZE 16
 
 // Uncomment one of the following screen resolutions. Try them all:)
-const vga_timing *timing = &t1024x768x60;
-//const vga_timing *timing = &t800x600x60;
+//const vga_timing *timing = &t1024x768x60;
+const vga_timing *timing = &t800x600x60;
 //const vga_timing *timing = &t640x480x60;
 //const vga_timing *timing = &t640x400x70;
 
 // Must use this instance name (vga4bit). It is used in the driver.
 FlexIO2VGA vga4bit;
-static int fb_width, fb_height;
+
+uint16_t fbWidth, fbHeight;
 
 // Array of vga4bit Basic Colors
 const uint8_t myColors[] = {
@@ -79,7 +80,7 @@ void setup() {
   //                    Color Depth   = 4 bits
   vga4bit.begin(*timing, false, false, 4);
   // Get display dimensions
-  vga4bit.getFbSize(&fb_width, &fb_height);
+  vga4bit.getFbSize(&fbWidth, &fbHeight);
   // Set fontsize 8x16 or (8x8 available)
   vga4bit.setFontSize(FONTSIZE, false);
   // Set default foreground and background colors
@@ -87,8 +88,8 @@ void setup() {
   vga4bit.setForegroundColor(VGA_BRIGHT_GREEN);
   // Clear screen to background color
   vga4bit.clear(VGA_BLACK);
-  vga4bit.textxy(0,fb_height-FONTSIZE);
-  vga4bit.printf("4 bit VGA version of Sumotoy's treedee example at 1024x768 with 16 colors...");
+  vga4bit.textxy(0,fbHeight-FONTSIZE);
+  vga4bit.printf("4 bit VGA version of Sumotoy's treedee example at 800x600 with 16 colors...");
 }
 
 void loop() {
@@ -111,8 +112,8 @@ void loop() {
     float ay = sin_d[r[2]] * px3 + cos_d[r[2]] * py3;
     float az = pz3 - 190;
 
-    p2x[i] = ((fb_width) / 2) + ax * 500 / az;
-    p2y[i] = ((fb_height) / 2) + ay * 500 / az;
+    p2x[i] = ((fbWidth) / 2) + ax * 500 / az;
+    p2y[i] = ((fbHeight) / 2) + ay * 500 / az;
   }
   for (int i = 0; i < 3; i++) {
     vga4bit.drawLine(p2x[i], p2y[i], p2x[i + 1], p2y[i + 1], ccolor, false);

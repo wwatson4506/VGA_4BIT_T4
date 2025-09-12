@@ -25,7 +25,7 @@ bool wait = true;
 // false, itr should be set to at least 10000.
 int itr = 500;
 
-int fb_width, fb_height;
+uint16_t fbWidth, fbHeight;
 
 void setup() {
   Serial.begin(9600);
@@ -37,7 +37,7 @@ void setup() {
   //                    Color Depth   = 4 bits
   vga4bit.begin(*timing, false, false, 4);
   // Get display dimensions
-  vga4bit.getFbSize(&fb_width, &fb_height);
+  vga4bit.getFbSize(&fbWidth, &fbHeight);
   vga4bit.wait_for_frame();
   // Clear graphic screen
   vga4bit.clear(VGA_BLACK);
@@ -68,52 +68,52 @@ void loop() {
   vga4bit.clear(VGA_BLACK); // Clear graphic screen
   for(i = 0; i<=itr; i++) {
     vga4bit.fbUpdate(wait); //wait_for_frame();
-    x0=random(fb_width);
-    y0=random(fb_height);
-    x1=random(fb_width);
-    y1=random(fb_height);
-    y2=random(fb_height);
+    x0=random(fbWidth);
+    y0=random(fbHeight);
+    x1=random(fbWidth);
+    y1=random(fbHeight);
+    y2=random(fbHeight);
     vga4bit.drawTriangle(x0,y0,x1,y1,y2,y2,random(16));
   }
 
   vga4bit.clear(VGA_BLACK); // Clear graphic screen
   for(i = 0; i<=itr; i++) {
     vga4bit.fbUpdate(wait); //wait_for_frame();
-    x0=random(fb_width);
-    y0=random(fb_height);
-    x1=random(fb_width);
-    y1=random(fb_height);
-    y2=random(fb_height);
+    x0=random(fbWidth);
+    y0=random(fbHeight);
+    x1=random(fbWidth);
+    y1=random(fbHeight);
+    y2=random(fbHeight);
     vga4bit.fillTriangle(x0,y0,x1,y1,y2,y2,random(16));
   }
   
   vga4bit.clear(VGA_BLACK); // Clear graphic screen
   for(i = 0; i<=itr; i++) {
     vga4bit.fbUpdate(wait); //wait_for_frame();
-    x0=random(fb_width);
-    y0=random(fb_height);
-    x1=random(fb_width);
-    y1=random(fb_height);
+    x0=random(fbWidth);
+    y0=random(fbHeight);
+    x1=random(fbWidth);
+    y1=random(fbHeight);
     vga4bit.drawRect(x0,y0,x1,y1,random(16));
   }
 
   vga4bit.clear(VGA_BLACK); // Clear graphic screen
   for(i = 0; i<=itr; i++) {
     vga4bit.fbUpdate(wait); //wait_for_frame();
-    x0=random(fb_width);
-    y0=random(fb_height);
-    x1=random(fb_width);
-    y1=random(fb_height);
+    x0=random(fbWidth);
+    y0=random(fbHeight);
+    x1=random(fbWidth);
+    y1=random(fbHeight);
     vga4bit.fillRect(x0,y0,x1,y1,random(16));
   }
 
   vga4bit.clear(VGA_BLACK); // Clear graphic screen
   for(i = 0; i<=itr; i++) {
     vga4bit.fbUpdate(wait); //wait_for_frame();
-    x0=random(fb_width);
-    y0=random(fb_height);
-    x1=random(fb_width);
-    y1=random(fb_height);
+    x0=random(fbWidth);
+    y0=random(fbHeight);
+    x1=random(fbWidth);
+    y1=random(fbHeight);
     r=random(50)+5;
     vga4bit.drawRrect(x0,y0,x1,y1,r,random(16));
   }
@@ -121,10 +121,10 @@ void loop() {
   vga4bit.clear(VGA_BLACK); // Clear graphic screen
   for(i = 0; i<=itr; i++) {
     vga4bit.fbUpdate(wait); //wait_for_frame();
-    x0=random(fb_width);
-    y0=random(fb_height);
-    x1=random(fb_width);
-    y1=random(fb_height);
+    x0=random(fbWidth);
+    y0=random(fbHeight);
+    x1=random(fbWidth);
+    y1=random(fbHeight);
     r=random(50)+5;
     vga4bit.fillRrect(x0,y0,x1,y1,r,random(16));
   }
@@ -132,8 +132,8 @@ void loop() {
   vga4bit.clear(VGA_BLACK); // Clear graphic screen
   for(i = 0; i<=itr; i++) {
     vga4bit.fbUpdate(wait); //wait_for_frame();
-    x0=random(fb_width-1);
-    y0=random(fb_height-1);
+    x0=random(fbWidth-1);
+    y0=random(fbHeight-1);
     x1=random(100)+20;
     y1=random(100)+20;
     vga4bit.drawEllipse(x0,y0,x1,y1,random(16));
@@ -142,8 +142,8 @@ void loop() {
   vga4bit.clear(VGA_BLACK); // Clear graphic screen
   for(i = 0; i<=itr; i++) {
     vga4bit.fbUpdate(wait); //wait_for_frame();
-    x0=random(fb_width-1);
-    y0=random(fb_height-1);
+    x0=random(fbWidth-1);
+    y0=random(fbHeight-1);
     x1=random(100)+20;
     y1=random(100)+20;
     vga4bit.fillEllipse(x0, y0, x1, y1, random(16));
@@ -152,8 +152,8 @@ void loop() {
   vga4bit.clear(VGA_BLACK); // Clear graphic screen
   for(i = 0; i<=itr; i++) {
     vga4bit.fbUpdate(wait); //wait_for_frame();
-    x0=random(fb_width);
-    y0=random(fb_height);
+    x0=random(fbWidth);
+    y0=random(fbHeight);
     r=random(50);
     vga4bit.drawCircle(x0,y0,r,1,random(16));
   }	
@@ -161,8 +161,8 @@ void loop() {
   vga4bit.clear(VGA_BLACK); // Clear graphic screen
   for(i = 0; i<=itr; i++) {
     vga4bit.fbUpdate(wait); //wait_for_frame();
-    x0=random(fb_width);
-    y0=random(fb_height);
+    x0=random(fbWidth);
+    y0=random(fbHeight);
     r=random(50);
     vga4bit.fillCircle(x0,y0,r,random(16));
   }	
@@ -170,8 +170,8 @@ void loop() {
   vga4bit.clear(VGA_BLACK); // Clear graphic screen
   for(i = 0; i<=itr; i++) {
     vga4bit.fbUpdate(wait); //wait_for_frame();
-    x0=random(fb_width);
-    y0=random(fb_height);
+    x0=random(fbWidth);
+    y0=random(fbHeight);
     r=random(5)-1;
     vga4bit.drawText(x0,y0,"Hello Teensy!",random(16),random(16),dir[r]);
   }
@@ -179,8 +179,8 @@ void loop() {
   vga4bit.clear(VGA_BLACK); // Clear graphic screen
   for(i = 0; i<=itr; i++) {
     vga4bit.fbUpdate(wait); //wait_for_frame();
-    x0=random(fb_width);
-    y0=random(fb_height);
+    x0=random(fbWidth);
+    y0=random(fbHeight);
     r=random(5)-1;
     vga4bit.drawText(x0,y0,"VGA_4_BIT Library",random(16),random(16),dir[r]);
   }
@@ -190,25 +190,25 @@ void loop() {
   vga4bit.clear(VGA_BLACK); // Clear graphic screen
   for (int i = 0;i<100;i++){
     vga4bit.fbUpdate(wait);
-    vga4bit.drawpolygon(random(fb_width) , random(fb_height), random(1,15));
+    vga4bit.drawpolygon(random(fbWidth) , random(fbHeight), random(1,15));
   }
   delay(2000);
   vga4bit.clear(VGA_BLACK);
   for (int i = 0;i<100;i++){
     vga4bit.fbUpdate(wait);
-    vga4bit.drawfullpolygon(random(fb_width) , random(fb_height), random(1,15),random(1,15));
+    vga4bit.drawfullpolygon(random(fbWidth) , random(fbHeight), random(1,15),random(1,15));
   }
   delay(2000);
   vga4bit.clear(VGA_BLACK);
   for (int i = 0;i<100;i++){
     vga4bit.fbUpdate(wait);
-    vga4bit.drawrotatepolygon(random(fb_width) , random(fb_height) , random(360), random(1,15), random(1,15), 0);
+    vga4bit.drawrotatepolygon(random(fbWidth) , random(fbHeight) , random(360), random(1,15), random(1,15), 0);
   }
   delay(2000);
   vga4bit.clear(VGA_BLACK);
   for (int i = 0;i<100;i++){
    vga4bit.fbUpdate(wait);
-   vga4bit.drawrotatepolygon(random(fb_width) , random(fb_height) , random(360), random(1,15), random(1,15), 1);
+   vga4bit.drawrotatepolygon(random(fbWidth) , random(fbHeight) , random(360), random(1,15), random(1,15), 1);
   }
   delay(2000);
   vga4bit.clear(VGA_BLACK);
@@ -222,14 +222,14 @@ void loop() {
   delay(2000);
   vga4bit.clear(VGA_BLACK); // Clear graphic screen
   for (int i = 0;i<1000;i++){
-    vga4bit.fillQuad(random(fb_width) , random(fb_height) ,random(150)+10 , random(150)+10 ,random(360) , random(16));
+    vga4bit.fillQuad(random(fbWidth) , random(fbHeight) ,random(150)+10 , random(150)+10 ,random(360) , random(16));
     vga4bit.fbUpdate(wait);
   }
   delay(4000);
 
   vga4bit.clear(VGA_BLACK); // Clear graphic screen
   for (int i = 0;i<100;i++){
-    vga4bit.drawQuad(random(fb_width) , random(fb_height) ,random(150)+10 , random(150)+10,random(360) , random(16));
+    vga4bit.drawQuad(random(fbWidth) , random(fbHeight) ,random(150)+10 , random(150)+10,random(360) , random(16));
     vga4bit.fbUpdate(wait);
   }
   delay(4000);

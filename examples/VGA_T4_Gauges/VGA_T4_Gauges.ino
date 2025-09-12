@@ -19,7 +19,7 @@ const vga_timing *timing = &t800x600x60;
 
 // Must use this instance name (vga4bit). It is used in the driver.
 FlexIO2VGA vga4bit;
-static int fb_width, fb_height;
+uint16_t fbWidth, fbHeight;
 
 // Array of vga4bit Basic Colors
 const uint16_t myColors[] = {
@@ -66,7 +66,7 @@ void setup() {
   //                    Color Depth   = 4 bits
   vga4bit.begin(*timing, false, false, 4);
   // Get display dimensions
-  vga4bit.getFbSize(&fb_width, &fb_height);
+  vga4bit.getFbSize(&fbWidth, &fbHeight);
   // Set fontsize 8x16 or (8x8 available)
   vga4bit.setFontSize(FONTSIZE, false);
   // Set default foreground and background colors
@@ -75,7 +75,7 @@ void setup() {
   // Clear screen to background color
   vga4bit.clear(VGA_BLUE);
   // Move text cursor to last line of display
-  vga4bit.textxy(0,fb_height-FONTSIZE);
+  vga4bit.textxy(0,fbHeight-FONTSIZE);
   vga4bit.printf("4 bit VGA version of Sumotoy's gauges example...");
   // Draw guage face (6 gauges)
   for (uint8_t i = 0; i < 6; i++) {

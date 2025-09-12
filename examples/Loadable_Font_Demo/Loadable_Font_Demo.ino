@@ -51,7 +51,7 @@ const vga_timing *timing = &t800x600x60;
 
 // Must use this instance name. It's used in the driver.
 FlexIO2VGA vga4bit;
-static int fb_width, fb_height;
+uint16_t fbWidth, fbHeight;
 
 //=========================================
 // Create a 4096 byte buffer for font file.
@@ -93,7 +93,7 @@ void setup() {
   vga4bit.begin(*timing, false, false, 4);
 
   // Get display dimensions
-  vga4bit.getFbSize(&fb_width, &fb_height);
+  vga4bit.getFbSize(&fbWidth, &fbHeight);
   // Set fontsize 8x8 or (8x16 available)
   vga4bit.setFontSize(FONTSIZE,false);
   // Set default foreground and background colors

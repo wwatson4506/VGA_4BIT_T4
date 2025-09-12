@@ -1,5 +1,24 @@
 // 1024x768_Screen_8x8_font_4_windows.ino
 
+//**********************************************************************
+// NOTE: This sketch must have dimensions 1024x768 sett in 'VGA_T4_Config.h'.
+//       Uncomment MAX_WIDTH and MAX_HEIGHT like this:
+//
+//         #define MAX_WIDTH (1024/2)
+//         #define MAX_HEIGHT 768
+//
+//         //#define MAX_WIDTH (800/2)
+//         //#define MAX_HEIGHT 600
+//
+//         //#define MAX_WIDTH (640/2)
+//         //#define MAX_HEIGHT 480
+//
+//         //#define MAX_WIDTH (640/2)
+//         //#define MAX_HEIGHT 400
+//**********************************************************************
+//       Leave the rest commented out!!
+//**********************************************************************
+
 #include "VGA_4bit_T4.h"
 #include "VGA_T4_Config.h"
 #include "window.h"
