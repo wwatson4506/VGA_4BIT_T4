@@ -4,7 +4,7 @@
 	"platforms": "Teensy T4 micromod DB5",
 	"keywords": "VGA_4bit_T4",
 	"description": "wwatson VGA_4bit_T4 Library",
-	"version": "1.0.1",
+	"version": "1.2.1",
 	"authors":
 	{	"name": "Warren Watson",
 		"maintainer": true
