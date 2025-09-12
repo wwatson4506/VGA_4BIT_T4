@@ -417,7 +417,7 @@ FLASHMEM void FlexIO2VGA::setDoubleHeight(bool doubleHeight) {
 //-------------------------------------------
 // Get frame buffer size ( width and height).
 //-------------------------------------------
-FLASHMEM void FlexIO2VGA::getFbSize(int *width, int *height) {
+FLASHMEM void FlexIO2VGA::getFbSize(uint16_t *width, uint16_t *height) {
   *width = fb_width;
   *height = fb_height;
 }
@@ -1644,12 +1644,13 @@ FLASHMEM void FlexIO2VGA::init_text_settings() {
 // font_width / 2 (2 pixels per byte).
 // font_height * 2 (compensate for font_width / 2).
 //====================================================
-FLASHMEM void FlexIO2VGA::getChar(int16_t x, int16_t y, uint8_t *buf) {
-  for(int16_t i = 0; i < font_height*2; i++) {
+FLASHMEM uint8_t *FlexIO2VGA::getChar(int16_t x, int16_t y, uint8_t *buf) {
+  for(int16_t i = 0; i < font_height; i++) {
     for(int16_t j = 0; j < (font_width/2); j++) {
       *buf++ = getByte((x * font_width/2)+j, (y * font_height)+i);
     }
   }
+  return buf;
 }
 
 //====================================================
@@ -1659,12 +1660,13 @@ FLASHMEM void FlexIO2VGA::getChar(int16_t x, int16_t y, uint8_t *buf) {
 // font_width / 2 (2 pixels per byte).
 // font_height * 2 (compensate for font_width / 2).
 //====================================================
-FLASHMEM void FlexIO2VGA::putChar(int16_t x, int16_t y, uint8_t *buf) {
-  for(int16_t i = 0; i < font_height*2; i++) {
+FLASHMEM uint8_t *FlexIO2VGA::putChar(int16_t x, int16_t y, uint8_t *buf) {
+  for(int16_t i = 0; i < font_height; i++) {
     for(int16_t j = 0; j < (font_width/2); j++) {
       putByte((x * font_width/2)+j, (y * font_height)+i, *buf++);
     }
   }
+  return buf;
 }
 
 //====================================================

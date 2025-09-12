@@ -11,17 +11,18 @@
 // less DMAMEM/malloc memory will be available.
 //===============================================
 
-#define MAX_WIDTH (1024/2)
-#define MAX_HEIGHT 768
+//#define MAX_WIDTH (1024/2)
+//#define MAX_HEIGHT 768
 
-//#define MAX_WIDTH (800/2)
-//#define MAX_HEIGHT 600
+#define MAX_WIDTH (800/2)
+#define MAX_HEIGHT 600
 
 //#define MAX_WIDTH (640/2)
 //#define MAX_HEIGHT 480
 
 //#define MAX_WIDTH (640/2)
 //#define MAX_HEIGHT 400
+
 //===============================================
 
 #define TABSIZE 4

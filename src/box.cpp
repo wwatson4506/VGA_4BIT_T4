@@ -13,23 +13,32 @@ uint8_t *vbox_get(int16_t row1, int16_t col1, int16_t row2, int16_t col2) {
   uint16_t bytes;
   uint8_t *buf, *bufptr;
 
+  // Get byte count for 1 video character. Font width is divided by 2 as
+  // one pixel color is 4 bits for 16 colors. So an 8x8 font becomes 4x8
+  // and an 8x16 font becomes 4x16. 4x8 = 32bytes and 4x16 = 64 bytes
+  // per character. 
+  uint8_t fontSize = ((vga4bit.getFontWidth() / 2) * vga4bit.getFontHeight());
+  
   // Keep in bounds of current character display.
   tHeight = vga4bit.getTheight();
   if(row2 >= tHeight) row2 = tHeight-1;
   tWidth = vga4bit.getTwidth();
   if(col2 >= tWidth) row2 = tWidth-1;
-  
+
   // calculate dimensions in bytes
   width  = (col2 - col1) + 1;
   height = (row2 - row1) + 1;
-  bytes  = (height * width) + 8;
+
+  // Calculate number bytes needed for video save box malloc.
+  // width * height * fontSize + offset to actual data (8 bytes).
+  bytes  = height * width * fontSize + DATA_OFFSET; 
 
   // allocate storage space
   if((buf = (uint8_t *)malloc(sizeof(uint8_t)*bytes)) == NULL) {
+//  if((buf = (uint8_t *)extmem_malloc(sizeof(uint8_t)*bytes)) == NULL) {
     puts("vbox_get(): malloc() Failed\n");
     while(1);
   }
-  
   //======================================================
   // Save the box coordinates in the buffer.
   // First 8 bytes used to store four 16 bit coorrdinates.
@@ -43,11 +52,10 @@ uint8_t *vbox_get(int16_t row1, int16_t col1, int16_t row2, int16_t col2) {
   *bufptr++ = (uint8_t)(row2 &0xff);
   *bufptr++ = (uint8_t)((col2 >> 8) & 0xff);
   *bufptr++ = (uint8_t)(col2 & 0xff);
-
   // grab each line of video
-  for(uint16_t i = row1; i < row2; i++) {
-    for(uint16_t j = col1; j < col2+1; j++) {
-      vga4bit.getChar(j, i,bufptr);
+  for(uint16_t i = row1; i <= row2; i++) {
+    for(uint16_t j = col1; j <= col2; j++) {
+      bufptr = vga4bit.getChar(j, i,bufptr);
     }
   }
   return(buf);
@@ -61,6 +69,12 @@ void vbox_put(uint8_t *buf) {
   int16_t row1, col1, row2, col2;
   uint8_t *workbuf;
 
+  // Get byte count for 1 video character. Font width is divided by 2 as
+  // one pixel color is 4 bits for 16 colors. So an 8x8 font becomes 4x8
+  // and an 8x16 font becomes 4x16. 4x8 = 32bytes and 4x16 = 64 bytes
+  // per character. 
+  uint8_t fontSize = ((vga4bit.getFontWidth() / 2) * vga4bit.getFontHeight());
+
   // get the coordinates back
   workbuf = buf;
 
@@ -70,11 +84,10 @@ void vbox_put(uint8_t *buf) {
   row2 = (uint16_t)((workbuf[4] << 8) + (workbuf[5] & 0xff));
   col2 = (uint16_t)((workbuf[6] << 8) + (workbuf[7] & 0xff));
   workbuf+=8; // Skip over coords to data.
-
   // Write out each line of video
-  for(uint16_t i = row1; i < row2; i++) {
-    for(uint16_t j = col1; j < col2+1; j++) {
-      vga4bit.putChar(j, i, workbuf);
+  for(uint16_t i = row1; i <= row2; i++) {
+    for(uint16_t j = col1; j <= col2; j++) {
+      workbuf = vga4bit.putChar(j, i, workbuf);
     }
   }
 }
@@ -98,9 +111,9 @@ void box_charfill(int16_t row1, int16_t col1, int16_t row2, int16_t col2, char c
 // current text foreground color. Use a ascii block
 // character 219 with fillColor.
 //======================================================
-void box_color(uint8_t row1, uint8_t col1, uint8_t row2, uint8_t col2, uint8_t fillColor) {
-  uint8_t tempColor = vga4bit.getFGC();
-  vga4bit.setForegroundColor(fillColor);
+void box_color(uint8_t row1, uint8_t col1, uint8_t row2, uint8_t col2) {//, uint8_t fillColor) {
+//  uint8_t tempColor = vga4bit.getFGC();
+//  vga4bit.setForegroundColor(fillColor);
   uint8_t x, y;
   for(y = row1; y <= row2; y++) {
     for(x = col1; x <= col2; x++) {
@@ -108,7 +121,7 @@ void box_color(uint8_t row1, uint8_t col1, uint8_t row2, uint8_t col2, uint8_t f
       vga4bit.write(219);
     }
   }
-  vga4bit.setBackgroundColor(tempColor);
+//  vga4bit.setBackgroundColor(tempColor);
 }
 
 //============================================================

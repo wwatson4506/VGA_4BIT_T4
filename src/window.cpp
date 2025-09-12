@@ -25,7 +25,8 @@ int desktop(uint8_t bgColor, uint8_t frameType, uint8_t frameColor, uint8_t patt
   uint8_t tempBGC = vga4bit.getBGC();
   uint8_t centerText = getCenteredTextX(vga4bit.getTwidth(),deskTitle);  
 
-  box_color(0,0,2,vga4bit.getTwidth()-1, bgColor);
+  vga4bit.setForegroundColor(bgColor);
+  box_color(0,0,2,vga4bit.getTwidth()-1);//, bgColor);
   vga4bit.setForegroundColor(bgColor);
   box_charfill(2, 0, vga4bit.getTheight(), vga4bit.getTwidth()-1, pattern);
   vga4bit.setBackgroundColor(bgColor);

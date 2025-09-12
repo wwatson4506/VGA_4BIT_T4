@@ -423,7 +423,7 @@ public:
   size_t getPitch(void); // return stride size
   void setDoubleWidth(bool doubleWidth);  
   void setDoubleHeight(bool doubleHeight);  
-  void getFbSize(int *width, int *height);
+  void getFbSize(uint16_t *width, uint16_t *height);
   
   uint16_t getGwidth(void);
   uint16_t getGheight(void);
@@ -463,10 +463,10 @@ public:
                           uint8_t yEnd,uint8_t type);
   // low level frame buffer methods
   uint8_t getByte(uint32_t x, uint32_t y);
-  void getChar(int16_t x, int16_t y, uint8_t *buf);
+  uint8_t *getChar(int16_t x, int16_t y, uint8_t *buf);
   void getGptr(int16_t x, int16_t y, uint8_t *buf);
   void putByte(uint32_t x, uint32_t y, uint8_t byte);
-  void putChar(int16_t x, int16_t y, uint8_t *buf);
+  uint8_t *putChar(int16_t x, int16_t y, uint8_t *buf);
   void putGptr(int16_t x, int16_t y, uint8_t *buf);
   void writeVmem(uint8_t *buf, uint32_t vMem, uint32_t size);
   void readVmem(uint32_t vMem, uint8_t *buf, int32_t size);
