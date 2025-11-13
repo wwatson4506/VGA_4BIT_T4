@@ -1180,7 +1180,7 @@ int kilo(FS *type, char *filename) {
   while (!exitflag) {
 	vga4bit.slWrite(0, kiloColors[15], kiloColors[1], msgBuffer);
     editorRefreshScreen();
-	vga4bit.slWrite(0, kiloColors[15], kiloColors[1], msgBuffer);
+//	vga4bit.slWrite(0, kiloColors[15], kiloColors[1], msgBuffer);  Big OOPS!!!
     editorProcessKeypress();
 	vga4bit.slWrite(0, kiloColors[15], kiloColors[1], msgBuffer);
   }
